@@ -27,8 +27,9 @@ public class ExceptionMiddleware {
             NotFoundException e => (HttpStatusCode.NotFound, e.Message),
             ValidationException e => (HttpStatusCode.BadRequest, e.Message),
             ConflictException e => (HttpStatusCode.Conflict, e.Message),
+            UnauthorizedException e => (HttpStatusCode.Unauthorized, e.Message),
             _ => (HttpStatusCode.InternalServerError,
-                                       "Ocurrió un error interno. Intente nuevamente.")
+                                        "Ocurrió un error interno. Intente nuevamente.")
         };
 
         var respuesta = JsonSerializer.Serialize(new {

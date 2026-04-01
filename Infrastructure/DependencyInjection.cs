@@ -12,7 +12,7 @@ using System.Text;
 namespace Infrastructure;
 
 public static class DependencyInjection {
-    public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration) {
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration) {
         // ── Base de datos ─────────────────────────────────────────────────────
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
@@ -29,6 +29,7 @@ public static class DependencyInjection {
         services.AddScoped<IBaseConocimientoRepository, BaseConocimientoRepository>();
        
         // ── Servicios ─────────────────────────────────────────────────────────
-        //services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ITokenService, TokenService>();
+        return services;
     }
 }

@@ -1,14 +1,16 @@
-﻿using Application.CQRS.Commands.Incidencias;
+﻿using API.Extensions;
+using Application.CQRS.Commands.Incidencias;
 using Application.CQRS.Core;
 using Application.CQRS.Queries.Incidencias;
 using Application.DTOS.Incidencias;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class IncidenciasController : ControllerBase {
     private readonly IDispatcher _dispatcher;
 
@@ -18,11 +20,8 @@ public class IncidenciasController : ControllerBase {
     // Cuando implementes JWT estos se reemplazan por:
     //   int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!)
     //   int.Parse(User.FindFirstValue("RolId")!)
-    private int GetUsuarioId() =>
-        int.Parse(Request.Headers["X-Usuario-Id"].FirstOrDefault() ?? "0");
-
-    private int GetRolId() =>
-        int.Parse(Request.Headers["X-Rol-Id"].FirstOrDefault() ?? "3");
+    private int GetUsuarioId() => User.GetUsuarioId();
+    private int GetRolId() => User.GetRolId();
 
     // ── Queries ───────────────────────────────────────────────────────────────
 
