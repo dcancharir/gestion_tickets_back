@@ -35,12 +35,12 @@ public class ActualizarUsuarioHandler : ICommandHandler<ActualizarUsuarioCommand
         var usuario = await _repo.ObtenerPorPublicIdAsync(command.PublicId, ct)
             ?? throw new NotFoundException(nameof(Usuario), command.PublicId);
 
-        // 2. Validar email
-        var emailOcupado = await _repo.ExisteEmailAsync(
-            command.Email, excluirId: usuario.UsuarioId, ct: ct);
+        //// 2. Validar email
+        //var emailOcupado = await _repo.ExisteEmailAsync(
+        //    command.Email, excluirId: usuario.UsuarioId, ct: ct);
 
-        if(emailOcupado)
-            throw new ConflictException($"El email '{command.Email}' ya está en uso.");
+        //if(emailOcupado)
+        //    throw new ConflictException($"El email '{command.Email}' ya está en uso.");
 
         // 3. Aplicar cambios
         usuario.Nombre = command.Nombre;

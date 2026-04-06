@@ -9,7 +9,7 @@ using System.Text;
 namespace Application.CQRS.Commands.Auth;
 
 public record LoginCommand(
-    string Email,
+    string UserName,
     string Password
 ) : ICommand<TokenResponseDto>;
 
@@ -27,7 +27,7 @@ public class LoginHandler : ICommandHandler<LoginCommand, TokenResponseDto> {
     public async Task<TokenResponseDto> HandleAsync(
         LoginCommand command, CancellationToken ct = default) {
         // 1. Buscar usuario por email
-        var usuario = await _usuarioRepo.ObtenerPorEmailAsync(command.Email, ct)
+        var usuario = await _usuarioRepo.ObtenerPorUserNameAsync(command.UserName, ct)
             ?? throw new UnauthorizedException("Credenciales inválidas.");
 
         // 2. Verificar que la cuenta esté activa
@@ -49,7 +49,8 @@ public class LoginHandler : ICommandHandler<LoginCommand, TokenResponseDto> {
             usuario.Nombre,
             usuario.Apellidos,
             usuario.Email,
-            usuario.Rol.Nombre
+            usuario.Rol.Nombre,
+            usuario.UserName
         );
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Application.Ports.Driven;
 
@@ -19,4 +20,6 @@ public interface IUsuarioRepository {
     Task<Usuario> CrearAsync(Usuario usuario, CancellationToken ct = default);
     Task<Usuario> ActualizarAsync(Usuario usuario, CancellationToken ct = default);
     Task EliminarAsync(int id, CancellationToken ct = default);
+    Task<bool> ExisteUserNameAsync(string userName, int? excluirId = null, CancellationToken ct = default);
+    Task<Usuario?> ObtenerPorUserNameAsync(string userName, CancellationToken ct = default);
 }

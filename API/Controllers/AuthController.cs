@@ -20,7 +20,7 @@ public class AuthController : ControllerBase {
     [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto, CancellationToken ct) {
-        var result = await _dispatcher.SendAsync(new LoginCommand(dto.Email, dto.Password), ct);
+        var result = await _dispatcher.SendAsync(new LoginCommand(dto.UserName, dto.Password), ct);
         return Ok(result);
     }
 
@@ -35,7 +35,8 @@ public class AuthController : ControllerBase {
             Email = User.FindFirstValue(ClaimTypes.Email),
             Nombre = User.FindFirstValue(ClaimTypes.Name),
             RolId = int.Parse(User.FindFirstValue("RolId") ?? "0"),
-            Rol = User.FindFirstValue(ClaimTypes.Role)
+            Rol = User.FindFirstValue(ClaimTypes.Role),
+            UserName = User.FindFirstValue("UserName"),
         });
     }
 }

@@ -8,6 +8,6 @@ public record CrearUsuarioDto(
     string Nombre,
     string Apellidos,
     string Email,
-    string Password,
-    int RolId
+    int RolId,
+    string UserName
 );

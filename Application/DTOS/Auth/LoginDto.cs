@@ -5,6 +5,6 @@ using System.Text;
 namespace Application.DTOS.Auth;
 
 public record LoginDto(
-    string Email,
+    string UserName,
     string Password
 );

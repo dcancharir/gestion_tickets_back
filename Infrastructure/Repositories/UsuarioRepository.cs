@@ -62,4 +62,14 @@ public class UsuarioRepository : IUsuarioRepository {
         _db.Usuarios.Remove(usuario);
         await _db.SaveChangesAsync(ct);
     }
+
+    public async Task<bool> ExisteUserNameAsync(string userName, int? excluirId = null, CancellationToken ct = default) {
+        return await _db.Usuarios.AnyAsync(u => u.UserName == userName && (excluirId == null || u.UsuarioId != excluirId), ct);
+    }
+
+    public async Task<Usuario?> ObtenerPorUserNameAsync(string userName, CancellationToken ct = default) =>
+        await _db.Usuarios
+            .AsNoTracking()
+            .Include(u => u.Rol)
+            .FirstOrDefaultAsync(u => u.UserName == userName, ct);
 }

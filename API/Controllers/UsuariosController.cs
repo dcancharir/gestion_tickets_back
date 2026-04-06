@@ -38,7 +38,7 @@ public class UsuariosController : ControllerBase {
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Create([FromBody] CrearUsuarioDto dto, CancellationToken ct) {
         var command = new CrearUsuarioCommand(
-            dto.Nombre, dto.Apellidos, dto.Email, dto.Password, dto.RolId);
+            dto.Nombre, dto.Apellidos, dto.Email, dto.RolId,dto.UserName);
 
         var result = await _dispatcher.SendAsync(command, ct);
 

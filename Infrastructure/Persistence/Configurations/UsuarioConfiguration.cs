@@ -50,7 +50,7 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario> {
             .IsRequired()
             .HasDefaultValueSql("GETDATE()");
 
-        builder.HasIndex(u => u.Email)
+        builder.HasIndex(u => u.UserName)
             .IsUnique();
 
         builder.HasOne(u => u.Rol)

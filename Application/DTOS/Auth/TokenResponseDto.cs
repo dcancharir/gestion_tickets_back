@@ -11,5 +11,6 @@ public record TokenResponseDto(
     string Nombre,
     string Apellidos,
     string Email,
-    string Rol
+    string Rol,
+    string UserName
 );

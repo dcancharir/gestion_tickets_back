@@ -12,6 +12,7 @@ public record UsuarioDto(
     int RolId,
     string RolNombre,
     bool Activo,
-    DateTime FechaCreacion
+    DateTime FechaCreacion,
+    string UserName
 // UsuarioId (int) nunca aparece aquí
 );

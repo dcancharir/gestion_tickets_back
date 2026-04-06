@@ -15,8 +15,8 @@ public record CrearUsuarioCommand(
     string Nombre,
     string Apellidos,
     string Email,
-    string Password,
-    int RolId
+    int RolId,
+    string UserName
 ) : ICommand<UsuarioDto>;
 
 // ── Handler ───────────────────────────────────────────────────────────────────
@@ -32,12 +32,13 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
         CrearUsuarioCommand command,
         CancellationToken ct = default) {
         // 1. Validar que el email no esté en uso
-        var emailOcupado = await _repo.ExisteEmailAsync(command.Email, ct: ct);
-        if(emailOcupado)
-            throw new ConflictException($"El email '{command.Email}' ya está registrado.");
+        var userNameOcupado = await _repo.ExisteUserNameAsync(command.UserName, ct: ct);
+        if(userNameOcupado)
+            throw new ConflictException($"El nombre de usuario '{command.UserName}' ya está registrado.");
 
         // 2. Hashear la contraseña con BCrypt
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(command.Password);
+
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(command.Email);
 
         // 3. Crear la entidad
         var usuario = new Usuario {
@@ -47,7 +48,8 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
             PasswordHash = passwordHash,
             RolId = command.RolId,
             Activo = true,
-            FechaCreacion = DateTime.Now
+            FechaCreacion = DateTime.Now,
+            UserName = command.UserName,
         };
 
         var creado = await _repo.CrearAsync(usuario, ct);
@@ -63,7 +65,8 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
             conRol.RolId,
             conRol.Rol.Nombre,
             conRol.Activo,
-            conRol.FechaCreacion
+            conRol.FechaCreacion,
+            conRol.UserName
         );
     }
 }

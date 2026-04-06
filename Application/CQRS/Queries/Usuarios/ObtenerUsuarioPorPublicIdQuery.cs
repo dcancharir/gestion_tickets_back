@@ -38,6 +38,7 @@ public class ObtenerUsuarioPorPublicIdHandler
         u.RolId,
         u.Rol.Nombre,
         u.Activo,
-        u.FechaCreacion
+        u.FechaCreacion,
+        u.UserName
     );
 }
