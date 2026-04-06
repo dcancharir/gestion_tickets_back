@@ -22,6 +22,9 @@ public class ApplicationDbContext : DbContext {
     public DbSet<HistorialIncidencia> HistorialIncidencias { get; set; }
     public DbSet<ComentarioIncidencia> ComentariosIncidencia { get; set; }
     public DbSet<BaseConocimiento> BaseConocimiento { get; set; }
+    
+    public DbSet<PermisoRol> PermisosRol { get; set; }
+    public DbSet<Permiso> Permisos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);

@@ -25,7 +25,7 @@ public class RolConfiguration : IEntityTypeConfiguration<Rol> {
 
         builder.HasIndex(r => r.Nombre)
             .IsUnique();
-
+        
         // ── Seed ─────────────────────────────────────────────────────────────
         builder.HasData(
             new Rol { RolId = 1, Nombre = "Administrador", Descripcion = "Acceso total al sistema" },

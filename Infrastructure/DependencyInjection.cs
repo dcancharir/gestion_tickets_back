@@ -27,7 +27,8 @@ public static class DependencyInjection {
         services.AddScoped<IAcuerdoNivelServicioRepository, AcuerdoNivelServicioRepository>();
         services.AddScoped<IIncidenciaRepository, IncidenciaRepository>();
         services.AddScoped<IBaseConocimientoRepository, BaseConocimientoRepository>();
-       
+        services.AddScoped<IPermisoRepository, PermisoRepository>();
+        services.AddScoped<IPermisoRolRepository, PermisoRolRepository>();
         // ── Servicios ─────────────────────────────────────────────────────────
         services.AddScoped<ITokenService, TokenService>();
         return services;
