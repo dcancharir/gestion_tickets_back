@@ -25,7 +25,8 @@ internal static class IncidenciaMapper {
         i.FechaResolucion.HasValue && i.FechaLimiteResolucion.HasValue
             ? i.FechaResolucion <= i.FechaLimiteResolucion
             : null,
-        i.ResueltoEnPrimerContacto
+        i.ResueltoEnPrimerContacto,
+        i.Descripcion
     );
 
     internal static IncidenciaDetalleDto ToDetalle(

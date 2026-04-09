@@ -39,6 +39,7 @@ public class Incidencia {
     public DateTime? FechaCierre { get; set; }
     public int? CerradoPorId { get; set; }
     public DateTime FechaUltimaActualizacion { get; set; } = DateTime.Now;
+    public int SedeId { get; set; }
 
     // Navegación
     public Categoria Categoria { get; set; } = null!;
@@ -48,6 +49,8 @@ public class Incidencia {
     public Usuario? TecnicoAsignado { get; set; }
     public Usuario? EscaladoA { get; set; }
     public Usuario? CerradoPor { get; set; }
+    public Sede? Sede { get; set; }
     public ICollection<HistorialIncidencia> Historial { get; set; } = new List<HistorialIncidencia>();
     public ICollection<ComentarioIncidencia> Comentarios { get; set; } = new List<ComentarioIncidencia>();
+    public ICollection<IncidenciaAdjunto> Adjuntos { get; set; } = new List<IncidenciaAdjunto>();
 }

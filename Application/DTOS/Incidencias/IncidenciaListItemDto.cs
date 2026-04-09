@@ -18,5 +18,6 @@ public record IncidenciaListItemDto(
     DateTime FechaRegistro,
     DateTime? FechaLimiteResolucion,
     bool? CumpleSla,
-    bool ResueltoEnPrimerContacto
+    bool ResueltoEnPrimerContacto,
+    string Descripcion
 );
