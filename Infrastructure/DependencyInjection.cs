@@ -29,6 +29,8 @@ public static class DependencyInjection {
         services.AddScoped<IBaseConocimientoRepository, BaseConocimientoRepository>();
         services.AddScoped<IPermisoRepository, PermisoRepository>();
         services.AddScoped<IPermisoRolRepository, PermisoRolRepository>();
+        services.AddScoped<ISedeRepository, SedeRepository>();
+        services.AddScoped<IIncidenciaAdjuntoRepository, IncidenciaAdjuntoRepository>();
         // ── Servicios ─────────────────────────────────────────────────────────
         services.AddScoped<ITokenService, TokenService>();
         return services;

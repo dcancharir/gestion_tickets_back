@@ -26,7 +26,8 @@ internal static class IncidenciaMapper {
             ? i.FechaResolucion <= i.FechaLimiteResolucion
             : null,
         i.ResueltoEnPrimerContacto,
-        i.Descripcion
+        i.Descripcion,
+        i.Sede?.Nombre is not null ? $"{i.Sede.Nombre}" : null
     );
 
     internal static IncidenciaDetalleDto ToDetalle(
@@ -64,6 +65,7 @@ internal static class IncidenciaMapper {
         i.FechaResolucion.HasValue && i.FechaLimiteResolucion.HasValue
             ? i.FechaResolucion <= i.FechaLimiteResolucion
             : null,
+        i.Sede?.Nombre is not null ? $"{i.Sede.Nombre}" : null,
         historial.Select(h => new HistorialDto(
             h.Accion,
             h.EstadoAnterior,

@@ -22,13 +22,14 @@ public record RegistrarIncidenciaCommand(
     byte Impacto,
     byte Urgencia,
     int PrioridadId,
-    int SolicitanteId   // resuelto desde el JWT en el controller
+    int SolicitanteId,// resuelto desde el JWT en el controller
+    int SedeId
+
 ) : ICommand<IncidenciaListItemDto>;
 
 public class RegistrarIncidenciaHandler
     : ICommandHandler<RegistrarIncidenciaCommand, IncidenciaListItemDto> {
     private readonly IIncidenciaRepository _repo;
-    private readonly IIncidenciaRepository _incidenciaRepo;
 
     public RegistrarIncidenciaHandler(IIncidenciaRepository repo) => _repo = repo;
 
@@ -53,7 +54,8 @@ public class RegistrarIncidenciaHandler
             SolicitanteId = cmd.SolicitanteId,
             EstadoId = 1, // Registrado
             FechaRegistro = ahora,
-            FechaUltimaActualizacion = ahora
+            FechaUltimaActualizacion = ahora,
+            SedeId = cmd.SedeId,
         };
 
         var creada = await _repo.CrearAsync(incidencia, ct);

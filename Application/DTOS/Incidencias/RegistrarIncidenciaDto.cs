@@ -11,6 +11,7 @@ public record RegistrarIncidenciaDto(
     string CanalReporte,
     byte Impacto,
     byte Urgencia,
-    int PrioridadId
+    int PrioridadId,
+    int SedeId
 // SolicitanteId viene del JWT, no del body
 );

@@ -77,7 +77,8 @@ public class IncidenciasController : ControllerBase {
             dto.Impacto,
             dto.Urgencia,
             dto.PrioridadId,
-            GetUsuarioId()
+            GetUsuarioId(),
+            dto.SedeId
         );
 
         var result = await _dispatcher.SendAsync(command, ct);

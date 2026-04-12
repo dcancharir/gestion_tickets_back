@@ -23,6 +23,7 @@ public class IncidenciaRepository : IIncidenciaRepository {
             .Include(i => i.EstadoIncidencia)
             .Include(i => i.Solicitante)
             .Include(i => i.TecnicoAsignado)
+            .Include(i=>i.Sede)
             .OrderByDescending(i => i.FechaRegistro)
             .ToListAsync(ct);
 
@@ -36,6 +37,7 @@ public class IncidenciaRepository : IIncidenciaRepository {
             .Include(i => i.TecnicoAsignado)
             .Include(i => i.EscaladoA)
             .Include(i => i.CerradoPor)
+        .Include(i => i.Sede)
             .FirstOrDefaultAsync(i => i.IncidenciaId == id, ct);
 
     public async Task<Incidencia?> ObtenerPorPublicIdAsync(Guid publicId, CancellationToken ct = default) =>
@@ -48,6 +50,7 @@ public class IncidenciaRepository : IIncidenciaRepository {
             .Include(i => i.TecnicoAsignado)
             .Include(i => i.EscaladoA)
             .Include(i => i.CerradoPor)
+        .Include(i => i.Sede)
             .FirstOrDefaultAsync(i => i.PublicId == publicId, ct);
 
     public async Task<IEnumerable<Incidencia>> ObtenerPorSolicitanteAsync(
@@ -57,6 +60,7 @@ public class IncidenciaRepository : IIncidenciaRepository {
             .Include(i => i.Categoria)
             .Include(i => i.NivelPrioridad)
             .Include(i => i.EstadoIncidencia)
+        .Include(i => i.Sede)
             .Where(i => i.SolicitanteId == solicitanteId)
             .OrderByDescending(i => i.FechaRegistro)
             .ToListAsync(ct);
@@ -69,6 +73,7 @@ public class IncidenciaRepository : IIncidenciaRepository {
             .Include(i => i.NivelPrioridad)
             .Include(i => i.EstadoIncidencia)
             .Include(i => i.Solicitante)
+        .Include(i => i.Sede)
             .Where(i => i.TecnicoAsignadoId == tecnicoId)
             .OrderByDescending(i => i.FechaRegistro)
             .ToListAsync(ct);

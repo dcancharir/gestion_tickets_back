@@ -32,6 +32,7 @@ public record IncidenciaDetalleDto(
     bool ResueltoEnPrimerContacto,
     byte NumeroReasignaciones,
     bool? CumpleSla,
+    string? Sede,
     IEnumerable<HistorialDto> Historial,
     IEnumerable<ComentarioDto> Comentarios
 );

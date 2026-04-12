@@ -114,5 +114,10 @@ public class IncidenciaConfiguration : IEntityTypeConfiguration<Incidencia> {
             .WithMany(e => e.Incidencias)
             .HasForeignKey(i => i.EstadoId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(i => i.Sede)
+            .WithMany(e => e.Incidencias)
+            .HasForeignKey(i => i.SedeId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

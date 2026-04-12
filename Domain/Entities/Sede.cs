@@ -5,8 +5,8 @@ namespace Domain.Entities;
 public class Sede
 {
     public int SedeId { get; set; }
-    public int SedeIdExterno {  get; set; }
+    public int SedeIdExterno {  get; set; } = 0;
     public string Nombre { get; set; } = null!;
-    public int TipoSede { get; set; }
+    public string TipoSede { get; set; } = null!;
     public ICollection<Incidencia> Incidencias { get; set; } = new List<Incidencia>();
 }
