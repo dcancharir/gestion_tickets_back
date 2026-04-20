@@ -27,6 +27,7 @@ public class IncidenciasController : ControllerBase {
 
     // GET api/incidencias
     [HttpGet]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<IncidenciaListItemDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken ct) {
         var result = await _dispatcher.QueryAsync(new ObtenerIncidenciasQuery(), ct);
@@ -64,6 +65,7 @@ public class IncidenciasController : ControllerBase {
     // ── Commands ──────────────────────────────────────────────────────────────
 
     // POST api/incidencias — cualquier rol puede crear
+    [AllowAnonymous]
     [HttpPost]
     [ProducesResponseType(typeof(IncidenciaListItemDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

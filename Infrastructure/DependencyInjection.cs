@@ -33,6 +33,8 @@ public static class DependencyInjection {
         services.AddScoped<IIncidenciaAdjuntoRepository, IncidenciaAdjuntoRepository>();
         // ── Servicios ─────────────────────────────────────────────────────────
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IPasswordGenerator, PasswordGenerator>();
         return services;
     }
 }

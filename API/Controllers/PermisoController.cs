@@ -1,10 +1,14 @@
-using System.Reflection;
-using System.Text.Json;
 using Application.CQRS.Commands.Permisos;
 using Application.CQRS.Core;
+using Application.CQRS.Queries.Permisos;
+using Application.CQRS.Queries.Usuarios;
 using Application.DTOS.Permiso;
+using Application.DTOS.Permisos;
+using Application.DTOS.Usuarios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
+using System.Text.Json;
 
 namespace API.Controllers;
 [ApiController]
@@ -15,7 +19,7 @@ public class PermisoController:ControllerBase
 
     public PermisoController(IDispatcher dispatcher) => _dispatcher = dispatcher;
     
-    [HttpGet]
+    [HttpPost("sincronizarpermisos")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public async Task<IActionResult> SincronizarPermisos(CancellationToken ct) {
@@ -72,5 +76,12 @@ public class PermisoController:ControllerBase
     {
         return typeof(IActionResult).IsAssignableFrom(method.ReturnType) ||
                (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>));
+    }
+    [HttpGet("getall")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IEnumerable<PermisoDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll(CancellationToken ct) {
+        var result = await _dispatcher.QueryAsync(new ObtenerPermisosQuery(), ct);
+        return Ok(result);
     }
 }

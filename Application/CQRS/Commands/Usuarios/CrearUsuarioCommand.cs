@@ -23,9 +23,13 @@ public record CrearUsuarioCommand(
 
 public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioDto> {
     private readonly IUsuarioRepository _repo;
+    private readonly IEmailService _emailService;
+    private readonly IPasswordGenerator _passwordService;
 
-    public CrearUsuarioHandler(IUsuarioRepository repo) {
+    public CrearUsuarioHandler(IUsuarioRepository repo, IEmailService emailService, IPasswordGenerator passwordService) {
         _repo = repo;
+        _emailService = emailService;
+        _passwordService = passwordService;
     }
 
     public async Task<UsuarioDto> HandleAsync(
@@ -37,8 +41,8 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
             throw new ConflictException($"El nombre de usuario '{command.UserName}' ya está registrado.");
 
         // 2. Hashear la contraseña con BCrypt
-
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(command.Email);
+        var password = _passwordService.Generate();
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
         // 3. Crear la entidad
         var usuario = new Usuario {
@@ -53,6 +57,7 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
         };
 
         var creado = await _repo.CrearAsync(usuario, ct);
+        _ = _emailService.SendEmail(command.Email, "Sistema Gestion de Tickets", $"Se ha creado una cuenta con los siguientes datos \n Usuario : {command.UserName} \n Password : {password}");
 
         // 4. Recargar con el Rol incluido para poblar el DTO
         var conRol = await _repo.ObtenerPorIdAsync(creado.UsuarioId, ct)!;
