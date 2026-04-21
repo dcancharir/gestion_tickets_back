@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using System.Text.Json;
+using Application.CQRS.Queries.PermisosRol;
+using Application.DTOS.PermisoRol;
 
 namespace API.Controllers;
 [ApiController]
@@ -82,6 +84,13 @@ public class PermisoController:ControllerBase
     [ProducesResponseType(typeof(IEnumerable<PermisoDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken ct) {
         var result = await _dispatcher.QueryAsync(new ObtenerPermisosQuery(), ct);
+        return Ok(result);
+    }
+    [HttpGet("getbyrol/{rolId:int}")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IEnumerable<PermisoRolDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetByRol(int rolId, CancellationToken ct) {
+        var result = await _dispatcher.QueryAsync(new ObtenerPermisosRolPorRolIdQuery(rolId), ct);
         return Ok(result);
     }
 }

@@ -32,7 +32,9 @@
     <setting file="file://$PROJECT_DIR$/API/Controllers/PermisoController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/API/Utilities/vistas.json" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Application/CQRS/Commands/Permisos/SincronizarPermisosCommand.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Application/CQRS/Queries/PermisosRol/ObtenerPermisosRolPorRolIdQuery.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Application/DTOS/Permiso/CrearPermisoDto.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Application/DTOS/PermisoRol/PermisoRolDto.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Application/Ports/Driven/IPermisoRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Application/Ports/Driven/IPermisoRolRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Domain/Entities/IndicenciaAdjunto.cs" root0="FORCE_HIGHLIGHTING" />
@@ -46,10 +48,10 @@
     <setting file="file://$PROJECT_DIR$/Infrastructure/Repositories/PermisoRolRepository.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="3BznSam03Y9VxTHIH2kK1m1Yymc" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />

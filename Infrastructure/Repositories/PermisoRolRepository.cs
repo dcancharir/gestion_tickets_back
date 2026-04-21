@@ -13,6 +13,36 @@ public class PermisoRolRepository : IPermisoRolRepository
     {
         _db = db;
     }
+    
+    public async Task<PermisoRol> CrearAsync(PermisoRol permisoRol, CancellationToken ct = default)
+    {
+        _db.PermisosRol.Add(permisoRol);
+        await _db.SaveChangesAsync(ct);
+        return permisoRol;
+    }
+
+    public async Task<bool> CrearRangoAsync(List<PermisoRol> permisosRol, CancellationToken ct = default)
+    {
+        await _db.PermisosRol.AddRangeAsync(permisosRol, ct);
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+
+    public async Task<bool> EliminarAsync(int id, CancellationToken ct = default)
+    {
+        var permisoRol = await _db.PermisosRol.FindAsync(new object[]{id},ct)
+                      ?? throw new KeyNotFoundException($"Permiso con Id {id} no existe");
+        _db.PermisosRol.Remove(permisoRol);
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+    public async Task<bool> EliminarRangoAsync(List<int> ids, CancellationToken ct = default)
+    {
+        var rows = await _db.PermisosRol
+            .Where(x => ids.Contains(x.PermisoRolId))
+            .ExecuteDeleteAsync(ct);
+        return rows > 0;
+    }
     public async Task<IEnumerable<PermisoRol>> ObtenerTodosPorRolIdAsync(int rolId, CancellationToken ct = default) =>
     await _db.PermisosRol
         .AsNoTracking()
