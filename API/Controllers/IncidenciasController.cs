@@ -67,10 +67,11 @@ public class IncidenciasController : ControllerBase {
     // POST api/incidencias — cualquier rol puede crear
     [AllowAnonymous]
     [HttpPost]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(IncidenciaListItemDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(
-        [FromBody] RegistrarIncidenciaDto dto, CancellationToken ct) {
+        [FromForm] RegistrarIncidenciaDto dto, CancellationToken ct) {
         var command = new RegistrarIncidenciaCommand(
             dto.Titulo,
             dto.Descripcion,
@@ -80,7 +81,8 @@ public class IncidenciasController : ControllerBase {
             dto.Urgencia,
             dto.PrioridadId,
             GetUsuarioId(),
-            dto.SedeId
+            dto.SedeId,
+            dto.Adjuntos
         );
 
         var result = await _dispatcher.SendAsync(command, ct);

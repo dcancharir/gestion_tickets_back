@@ -72,4 +72,8 @@ public class UsuarioRepository : IUsuarioRepository {
             .AsNoTracking()
             .Include(u => u.Rol)
             .FirstOrDefaultAsync(u => u.UserName == userName, ct);
+
+    public async Task<IEnumerable<Usuario>> ObtenerPorRolId(int rolId, CancellationToken ct = default) {
+        return await _db.Usuarios.Where(x => x.RolId == rolId).ToListAsync();
+    }
 }

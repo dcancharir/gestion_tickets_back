@@ -22,4 +22,5 @@ public interface IUsuarioRepository {
     Task EliminarAsync(int id, CancellationToken ct = default);
     Task<bool> ExisteUserNameAsync(string userName, int? excluirId = null, CancellationToken ct = default);
     Task<Usuario?> ObtenerPorUserNameAsync(string userName, CancellationToken ct = default);
+    Task<IEnumerable<Usuario>> ObtenerPorRolId(int rolId, CancellationToken ct = default);
 }

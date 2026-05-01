@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Text;
-
 namespace Application.DTOS.Incidencias;
 
 public record RegistrarIncidenciaDto(
@@ -12,6 +12,7 @@ public record RegistrarIncidenciaDto(
     byte Impacto,
     byte Urgencia,
     int PrioridadId,
-    int SedeId
+    int SedeId,
+    List<IFormFile>? Adjuntos
 // SolicitanteId viene del JWT, no del body
 );

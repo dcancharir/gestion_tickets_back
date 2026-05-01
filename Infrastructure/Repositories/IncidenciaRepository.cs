@@ -4,6 +4,7 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace Infrastructure.Repositories;
@@ -78,8 +79,10 @@ public class IncidenciaRepository : IIncidenciaRepository {
             .OrderByDescending(i => i.FechaRegistro)
             .ToListAsync(ct);
 
-    public async Task<int> ContarPorEstadoAsync(int estadoId, CancellationToken ct = default) =>
-        await _db.Incidencias.CountAsync(i => i.EstadoId == estadoId, ct);
+    public async Task<int> ContarPorEstadoAsync(int estadoId, CancellationToken ct = default) {
+
+        return (estadoId == 0) ? await _db.Incidencias.CountAsync(ct)  : await _db.Incidencias.CountAsync(i => i.EstadoId == estadoId, ct) ;
+    }
 
     // ── Persistencia ──────────────────────────────────────────────────────────
 
@@ -90,9 +93,20 @@ public class IncidenciaRepository : IIncidenciaRepository {
     }
 
     public async Task<Incidencia> ActualizarAsync(Incidencia incidencia, CancellationToken ct = default) {
-        _db.Incidencias.Update(incidencia);
-        await _db.SaveChangesAsync(ct);
+        await _db.Incidencias
+       .Where(i => i.IncidenciaId == incidencia.IncidenciaId)
+       .ExecuteUpdateAsync(s => s
+           .SetProperty(i => i.TecnicoAsignadoId, incidencia.TecnicoAsignadoId)
+           .SetProperty(i => i.FechaAsignacion, incidencia.FechaAsignacion)
+           .SetProperty(i => i.EstadoId, incidencia.EstadoId)
+           .SetProperty(i => i.FechaUltimaActualizacion, incidencia.FechaUltimaActualizacion)
+           .SetProperty(i => i.NumeroReasignaciones, incidencia.NumeroReasignaciones),
+           ct);
+
         return incidencia;
+        //_db.Incidencias.Update(incidencia);
+        //await _db.SaveChangesAsync(ct);
+        //return incidencia;
     }
 
     // ── Historial ─────────────────────────────────────────────────────────────

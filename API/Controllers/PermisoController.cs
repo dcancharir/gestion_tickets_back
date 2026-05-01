@@ -1,16 +1,17 @@
 using Application.CQRS.Commands.Permisos;
+using Application.CQRS.Commands.Usuarios;
 using Application.CQRS.Core;
 using Application.CQRS.Queries.Permisos;
+using Application.CQRS.Queries.PermisosRol;
 using Application.CQRS.Queries.Usuarios;
 using Application.DTOS.Permiso;
+using Application.DTOS.PermisoRol;
 using Application.DTOS.Permisos;
 using Application.DTOS.Usuarios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using System.Text.Json;
-using Application.CQRS.Queries.PermisosRol;
-using Application.DTOS.PermisoRol;
 
 namespace API.Controllers;
 [ApiController]
@@ -92,5 +93,27 @@ public class PermisoController:ControllerBase
     public async Task<IActionResult> GetByRol(int rolId, CancellationToken ct) {
         var result = await _dispatcher.QueryAsync(new ObtenerPermisosRolPorRolIdQuery(rolId), ct);
         return Ok(result);
+    }
+
+    // POST api/permiso
+    [HttpPost]
+    [ProducesResponseType(typeof(PermisoRolDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Create([FromBody] CrearPermisoRolDto dto, CancellationToken ct) {
+        var command = new CrearPermisoRolCommand(
+            dto.PermisoId,dto.RolId);
+
+        var result = await _dispatcher.SendAsync(command, ct);
+
+        // La URL de retorno usa el PublicId (Guid), no el int
+        return Created();
+    }
+    // DELETE api/permiso/1/2
+    [HttpDelete("{permisoId:int}/{rolId:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(int permisoId, int rolId, CancellationToken ct) {
+        await _dispatcher.SendAsync(new EliminarPermisoRolCommand(permisoId,rolId), ct);
+        return NoContent();
     }
 }

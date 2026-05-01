@@ -6,6 +6,8 @@ using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNetCore.Http;
+using Application.Utilities;
 
 namespace Application.CQRS.Commands.Incidencias;
 
@@ -23,15 +25,22 @@ public record RegistrarIncidenciaCommand(
     byte Urgencia,
     int PrioridadId,
     int SolicitanteId,// resuelto desde el JWT en el controller
-    int SedeId
-
+    int SedeId,
+    List<IFormFile>? Adjuntos
 ) : ICommand<IncidenciaListItemDto>;
 
 public class RegistrarIncidenciaHandler
     : ICommandHandler<RegistrarIncidenciaCommand, IncidenciaListItemDto> {
     private readonly IIncidenciaRepository _repo;
-
-    public RegistrarIncidenciaHandler(IIncidenciaRepository repo) => _repo = repo;
+    private readonly IFileStorageService _fileStorageService;
+    private readonly IIncidenciaAdjuntoRepository _adjuntoRepository;
+    private readonly IEmailService _emailService;
+    public RegistrarIncidenciaHandler(IIncidenciaRepository repo, IFileStorageService fileStorageService, IIncidenciaAdjuntoRepository adjuntoRepository, IEmailService emailService) {
+        _repo = repo;
+        _fileStorageService = fileStorageService;
+        _adjuntoRepository = adjuntoRepository;
+        _emailService = emailService;
+    }
 
     public async Task<IncidenciaListItemDto> HandleAsync(
         RegistrarIncidenciaCommand cmd, CancellationToken ct = default) {
@@ -60,6 +69,20 @@ public class RegistrarIncidenciaHandler
 
         var creada = await _repo.CrearAsync(incidencia, ct);
 
+        if(cmd.Adjuntos is not null && cmd.Adjuntos.Count()>0) {
+            foreach(var file in cmd.Adjuntos) {
+                var ruta = await _fileStorageService.SaveAsync(file, "incidencias");
+
+                await _adjuntoRepository.CrearAsync(new IncidenciaAdjunto {
+                    IncidenciaId = creada.IncidenciaId,
+                    Nombre = Path.GetFileNameWithoutExtension(file.FileName),
+                    NombreReal = file.FileName,
+                    RutaContenedora = ruta,
+                    FechaCreacion = DateTime.UtcNow
+                }, ct);
+            }
+        }
+        
         // Registrar en historial
         await _repo.AgregarHistorialAsync(new HistorialIncidencia {
             IncidenciaId = creada.IncidenciaId,
@@ -70,6 +93,9 @@ public class RegistrarIncidenciaHandler
         }, ct);
 
         var completa = await _repo.ObtenerPorIdAsync(creada.IncidenciaId, ct);
-        return IncidenciaMapper.ToListItem(completa!);
+        var mapped = IncidenciaMapper.ToListItem(completa!);
+        var template = EmailTemplateStrings.NewIncidenciaTemplate(mapped, $"http://localhost:4200/principal/ticket-detail/{mapped.PublicId}");
+        _ = _emailService.SendEmail("diego.canchari@designdevsoftware.com","Sistema de Gestión de Incidencias - Nueva Incidencia",template,true);
+        return mapped;
     }
 }

@@ -35,6 +35,7 @@ public static class DependencyInjection {
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IPasswordGenerator, PasswordGenerator>();
+        services.AddScoped<IFileStorageService, FileStorageService>();
         return services;
     }
 }

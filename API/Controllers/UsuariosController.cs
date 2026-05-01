@@ -70,4 +70,10 @@ public class UsuariosController : ControllerBase {
         await _dispatcher.SendAsync(new EliminarUsuarioCommand(publicId), ct);
         return NoContent();
     }
+    [HttpGet("getbyrolid/{rolId:int}")]
+    [ProducesResponseType(typeof(IEnumerable<UsuarioDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetByRolId(int rolId, CancellationToken ct) {
+        var result = await _dispatcher.QueryAsync(new ObtenerUsuariosQuery(), ct);
+        return Ok(result);
+    }
 }

@@ -23,7 +23,7 @@ public class EmailService : IEmailService {
                 mail.To.Add(to);
                 mail.Subject = subject;
                 mail.Body = body;
-                mail.IsBodyHtml = false;
+                mail.IsBodyHtml = isHtml;
 
                 using(var smtp = new SmtpClient("smtp.gmail.com", 587)) {
                     smtp.Credentials = new NetworkCredential(_from, _password);

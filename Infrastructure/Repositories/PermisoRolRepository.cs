@@ -67,4 +67,8 @@ public class PermisoRolRepository : IPermisoRolRepository
                 x.Permiso.Tipo.Equals("permiso",StringComparison.OrdinalIgnoreCase) &&
                 x.Permiso.Controlador.Equals(controllerName,StringComparison.OrdinalIgnoreCase)
                 ,ct);
+
+    public async Task<PermisoRol?> ObtenerPorPermisoYRol(int PermisoId, int RolId) {
+        return await _db.PermisosRol.FirstOrDefaultAsync(x => x.PermisoId == PermisoId && x.RolId == RolId);
+    }
 }
