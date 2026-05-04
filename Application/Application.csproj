@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DTOS\Dashboard\" />
     <Folder Include="DTOS\Common\" />
     <Folder Include="Ports\Driving\" />
   </ItemGroup>

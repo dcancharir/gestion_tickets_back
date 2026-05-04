@@ -100,7 +100,10 @@ public class IncidenciaRepository : IIncidenciaRepository {
            .SetProperty(i => i.FechaAsignacion, incidencia.FechaAsignacion)
            .SetProperty(i => i.EstadoId, incidencia.EstadoId)
            .SetProperty(i => i.FechaUltimaActualizacion, incidencia.FechaUltimaActualizacion)
-           .SetProperty(i => i.NumeroReasignaciones, incidencia.NumeroReasignaciones),
+           .SetProperty(i => i.NumeroReasignaciones, incidencia.NumeroReasignaciones)
+           .SetProperty(i=>i.SolucionAplicada,incidencia.SolucionAplicada)
+            .SetProperty(i => i.ResueltoEnPrimerContacto, incidencia.ResueltoEnPrimerContacto)
+           ,
            ct);
 
         return incidencia;
