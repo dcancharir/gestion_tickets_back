@@ -1,4 +1,5 @@
 ﻿using Application.DTOS.Incidencias;
+using Application.DTOS.Usuarios;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,7 +13,7 @@ public static class EmailTemplateStrings {
 <html>
 <head>
   <meta charset=""UTF-8"">
-  <title>Verify Email</title>
+  <title>GESTIÓN DE INCIDENCIAS</title>
 </head>
 <body style=""margin:0; padding:0; background-color:#fff;"">
   <table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0"" style=""background-color:#f4f6f9; padding:40px 0;"">
@@ -23,14 +24,14 @@ public static class EmailTemplateStrings {
           <!-- Logo / Header -->
           <tr>
             <td align=""center"" style=""padding-bottom:20px;"">
-              <span style=""font-size:24px; font-weight:bold; color:#1a1c23;"">Incidencia Registrada</span>
+              <span style=""font-size:24px; font-weight:bold; color:#1a1c23;"">Sistema de Gestión de Incidencias</span>
             </td>
           </tr>
 
           <!-- Title -->
           <tr>
             <td align=""center"" style=""font-size:20px; font-weight:bold; padding-bottom:10px; color:#1a1c23;"">
-              Nro. {incidencia.NumeroTicket}
+              Se ha registrado una incidencia con el Nro. {incidencia.NumeroTicket}
             </td>
           </tr>
 
@@ -49,6 +50,59 @@ public static class EmailTemplateStrings {
           <tr>
             <td align=""left"" style=""font-size:13px; color:#000;"">
               Puede ingresar ver la incidencia en el siguiente enlace<br/><br/>
+              <a href=""{uriSistema}"" style=""color:#blue; text-decoration:none;"">Sistema de Gestion de Incidencias</a>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+";
+    }
+    public static string NewUserTemplate(UsuarioDto usuario, string password, string uriSistema) {
+        return $@"
+    <!DOCTYPE html>
+<html>
+<head>
+  <meta charset=""UTF-8"">
+  <title>GESTIÓN DE INCIDENCIAS</title>
+</head>
+<body style=""margin:0; padding:0; background-color:#fff;"">
+  <table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0"" style=""background-color:#f4f6f9; padding:40px 0;"">
+    <tr>
+      <td align=""center"">
+        <table width=""500"" cellpadding=""0"" cellspacing=""0"" border=""0"" style=""background-color:#ffffff; border-radius:8px; padding:40px; font-family:Arial, sans-serif; color:#1a1c23;"">
+          
+          <!-- Logo / Header -->
+          <tr>
+            <td align=""center"" style=""padding-bottom:20px;"">
+              <span style=""font-size:24px; font-weight:bold; color:#1a1c23;"">Sistema de Gestión de Incidencias</span>
+            </td>
+          </tr>
+
+          <!-- Title -->
+          <tr>
+            <td align=""center"" style=""font-size:20px; font-weight:bold; padding-bottom:10px; color:#1a1c23;"">
+              Se te ha registrado una nueva cuenta para poder acceder al sistema, para poder acceder al sistema usa las siguientes credenciales
+            </td>
+          </tr>
+
+          <!-- Text -->
+          <tr>
+            <td align=""left"" style=""font-size:14px; line-height:1.6; color:#000; padding-bottom:30px;"">
+                <span style=""font-weight:bold"">USUARIO : </span>{usuario.UserName}<br>
+                <span style=""font-weight:bold"">PASSWORD : </span>{password}<br>
+                <span style=""font-weight:bold"">FECHA REGISTRO : </span>{usuario.FechaCreacion.ToString("yyyy-MM-dd HH:mm:ss tt")}<br>
+           
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td align=""left"" style=""font-size:13px; color:#000;"">
+              Puede ingresar al sistema a través del siguiente enlace :<br/><br/>
               <a href=""{uriSistema}"" style=""color:#blue; text-decoration:none;"">Sistema de Gestion de Incidencias</a>
             </td>
           </tr>

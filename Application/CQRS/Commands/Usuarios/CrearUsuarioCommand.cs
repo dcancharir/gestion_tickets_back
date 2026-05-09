@@ -2,6 +2,7 @@
 using Application.DTOS.Usuarios;
 using Application.Exceptions;
 using Application.Ports.Driven;
+using Application.Utilities;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,6 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
     private readonly IUsuarioRepository _repo;
     private readonly IEmailService _emailService;
     private readonly IPasswordGenerator _passwordService;
-
     public CrearUsuarioHandler(IUsuarioRepository repo, IEmailService emailService, IPasswordGenerator passwordService) {
         _repo = repo;
         _emailService = emailService;
@@ -41,7 +41,8 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
             throw new ConflictException($"El nombre de usuario '{command.UserName}' ya está registrado.");
 
         // 2. Hashear la contraseña con BCrypt
-        var password = _passwordService.Generate();
+        //var password = _passwordService.Generate();
+        var password = "102030";
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
         // 3. Crear la entidad
@@ -57,12 +58,10 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
         };
 
         var creado = await _repo.CrearAsync(usuario, ct);
-        _ = _emailService.SendEmail(command.Email, "Sistema Gestion de Tickets", $"Se ha creado una cuenta con los siguientes datos \n Usuario : {command.UserName} \n Password : {password}");
 
         // 4. Recargar con el Rol incluido para poblar el DTO
         var conRol = await _repo.ObtenerPorIdAsync(creado.UsuarioId, ct)!;
-
-        return new UsuarioDto(
+        var usuarioDto = new UsuarioDto(
             conRol!.PublicId,
             conRol.Nombre,
             conRol.Apellidos,
@@ -73,5 +72,9 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
             conRol.FechaCreacion,
             conRol.UserName
         );
+        var template = EmailTemplateStrings.NewUserTemplate(usuarioDto,password, $"http://localhost:4200");
+        _ = _emailService.SendEmail(command.Email, "Sistema Gestion de Tickets", $"Se ha creado una cuenta con los siguientes datos \n Usuario : {command.UserName} \n Password : {password}");
+
+        return usuarioDto;
     }
 }

@@ -102,7 +102,6 @@ var app = builder.Build();
 // ── Pipeline HTTP ─────────────────────────────────────────────────────────────
 app.UseMiddleware<ExceptionMiddleware>(); // primero, para capturar todo
 
-
 // Configure the HTTP request pipeline.
 if(app.Environment.IsDevelopment()) {
     app.UseSwagger();
@@ -120,6 +119,7 @@ app.UseAuthentication();  // antes de UseAuthorization
 
 app.UseAuthorization();
 
+app.UseMiddleware<RolePermissionMiddleware>();
 app.MapControllers();
 
 app.Run();

@@ -54,19 +54,25 @@ public class PermisoRolRepository : IPermisoRolRepository
     await _db.PermisosRol
     .AnyAsync(x=>
         x.RolId == rolId && 
-        x.Permiso.Nombre.Equals(uri,StringComparison.OrdinalIgnoreCase) &&
-        x.Permiso.Tipo.Equals("vista",StringComparison.OrdinalIgnoreCase)
+        x.Permiso.Nombre.ToLower() == uri &&
+        x.Permiso.Tipo.ToLower() == "vista"
         , ct);
 
-    public async Task<bool> VerificarSiRolTienePermisoDeControladorAsync(int rolId, string actionName, string controllerName,
-        CancellationToken ct = default) =>
-        await _db.PermisosRol
-            .AnyAsync(x => 
+    public async Task<bool> VerificarSiRolTienePermisoDeControladorAsync(
+       int rolId,
+       string actionName,
+       string controllerName,
+       CancellationToken ct = default) {
+        controllerName = controllerName.Replace("Controller", "");
+
+        return await _db.PermisosRol
+            .AnyAsync(x =>
                 x.RolId == rolId &&
-                x.Permiso.Nombre.Equals(actionName,StringComparison.OrdinalIgnoreCase) &&
-                x.Permiso.Tipo.Equals("permiso",StringComparison.OrdinalIgnoreCase) &&
-                x.Permiso.Controlador.Equals(controllerName,StringComparison.OrdinalIgnoreCase)
-                ,ct);
+                x.Permiso.Nombre.ToLower() == actionName &&
+                x.Permiso.Tipo.ToLower() == "permiso" &&
+                x.Permiso.Controlador.ToLower() == controllerName,
+                ct);
+    }
 
     public async Task<PermisoRol?> ObtenerPorPermisoYRol(int PermisoId, int RolId) {
         return await _db.PermisosRol.FirstOrDefaultAsync(x => x.PermisoId == PermisoId && x.RolId == RolId);
