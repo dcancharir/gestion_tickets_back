@@ -16,6 +16,14 @@ public class UsuarioSedeRepository : IUsuarioSedeRepository {
             .Where(us => us.UsuarioId == usuarioId)
             .ToListAsync(ct);
 
+    public async Task<IEnumerable<Usuario>> ObtenerUsuariosPorSedeIdAsync(int sedeId, CancellationToken ct = default) =>
+        await _db.UsuarioSede
+            .AsNoTracking()
+            .Include(us => us.Usuario).ThenInclude(u => u.Rol)
+            .Where(us => us.SedeId == sedeId && us.Usuario.Activo && us.Usuario.RolId == 2)
+            .Select(us => us.Usuario)
+            .ToListAsync(ct);
+
     public async Task AsignarSedesAsync(int usuarioId, IEnumerable<int> sedeIds, CancellationToken ct = default) {
         var existentes = await _db.UsuarioSede
             .Where(us => us.UsuarioId == usuarioId)
