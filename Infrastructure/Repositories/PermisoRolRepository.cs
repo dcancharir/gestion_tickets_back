@@ -50,28 +50,55 @@ public class PermisoRolRepository : IPermisoRolRepository
         .Where(x=>x.RolId == rolId)
         .ToListAsync(ct);
 
-    public async Task<bool> VerificarSiRolTienePermisoDeVistaAsync(int rolId, string uri, CancellationToken ct = default) =>
-    await _db.PermisosRol
-    .AnyAsync(x=>
-        x.RolId == rolId && 
-        x.Permiso.Nombre.ToLower() == uri &&
-        x.Permiso.Tipo.ToLower() == "vista"
-        , ct);
+    public async Task<bool> VerificarSiRolTienePermisoDeVistaAsync(int rolId, string uri, CancellationToken ct = default)
+    {
+        uri = uri.ToLower();
+
+        // Solo restringir si la vista está registrada Y al menos un rol la tiene asignada.
+        // Si nadie la tiene asignada aún, se considera no configurada → se deja pasar.
+        var asignadaAlgunRol = await _db.PermisosRol.AnyAsync(x =>
+            x.Permiso.Nombre.ToLower() == uri &&
+            x.Permiso.Tipo.ToLower()   == "vista",
+            ct);
+
+        if (!asignadaAlgunRol)
+            return true;
+
+        // La vista ya fue configurada → verificar si este rol la tiene
+        return await _db.PermisosRol.AnyAsync(x =>
+            x.RolId                    == rolId &&
+            x.Permiso.Nombre.ToLower() == uri &&
+            x.Permiso.Tipo.ToLower()   == "vista",
+            ct);
+    }
 
     public async Task<bool> VerificarSiRolTienePermisoDeControladorAsync(
        int rolId,
        string actionName,
        string controllerName,
-       CancellationToken ct = default) {
-        controllerName = controllerName.Replace("Controller", "");
+       CancellationToken ct = default)
+    {
+        controllerName = controllerName.Replace("Controller", "").ToLower();
+        actionName     = actionName.ToLower();
 
-        return await _db.PermisosRol
-            .AnyAsync(x =>
-                x.RolId == rolId &&
-                x.Permiso.Nombre.ToLower() == actionName &&
-                x.Permiso.Tipo.ToLower() == "permiso" &&
-                x.Permiso.Controlador.ToLower() == controllerName,
-                ct);
+        // Solo restringir si el permiso está registrado Y al menos un rol lo tiene asignado.
+        // Si nadie lo tiene asignado aún, se considera no configurado → se deja pasar.
+        var asignadoAlgunRol = await _db.PermisosRol.AnyAsync(x =>
+            x.Permiso.Nombre.ToLower()                           == actionName &&
+            x.Permiso.Controlador.Replace("Controller", "").ToLower() == controllerName &&
+            x.Permiso.Tipo.ToLower()                             == "permiso",
+            ct);
+
+        if (!asignadoAlgunRol)
+            return true;
+
+        // El permiso ya fue configurado para algún rol → verificar si este rol lo tiene
+        return await _db.PermisosRol.AnyAsync(x =>
+            x.RolId                                              == rolId &&
+            x.Permiso.Nombre.ToLower()                           == actionName &&
+            x.Permiso.Controlador.Replace("Controller", "").ToLower() == controllerName &&
+            x.Permiso.Tipo.ToLower()                             == "permiso",
+            ct);
     }
 
     public async Task<PermisoRol?> ObtenerPorPermisoYRol(int PermisoId, int RolId) {

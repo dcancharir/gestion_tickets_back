@@ -84,13 +84,18 @@ public class PermisoController:ControllerBase
     }
     /// <summary>
     /// Verifica si el usuario autenticado tiene permiso de vista para la URI indicada.
-    /// El frontend envía la ruta actual (ej. "security/users") y recibe { autorizado: true/false }.
+    /// Usa [AllowAnonymous] para que el RolePermissionMiddleware no lo intercepte;
+    /// la autenticación se valida manualmente dentro del action.
     /// </summary>
     [HttpGet("verificar-acceso")]
-    [Authorize]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> VerificarAcceso([FromQuery] string uri, CancellationToken ct)
     {
+        if (User.Identity?.IsAuthenticated != true)
+            return Unauthorized(new { mensaje = "No autenticado." });
+
         var usuarioId = GetUsuarioId();
         var autorizado = await _dispatcher.QueryAsync(
             new VerificarAccesoVistaQuery(usuarioId, uri), ct);

@@ -36,4 +36,11 @@ public static class ClaimsPrincipalExtensions {
     public static string GetNombre(this ClaimsPrincipal user)
         => user.FindFirstValue(ClaimTypes.Name)
             ?? throw new InvalidOperationException("Claim Name no encontrado.");
+
+    /// <summary>
+    /// Indica si el usuario tiene acceso total (omite la verificación de permisos por rol).
+    /// Devuelve false si el claim no está presente, nunca lanza excepción.
+    /// </summary>
+    public static bool GetHasFullAccess(this ClaimsPrincipal user)
+        => bool.TryParse(user.FindFirstValue("HasFullAccess"), out var v) && v;
 }
