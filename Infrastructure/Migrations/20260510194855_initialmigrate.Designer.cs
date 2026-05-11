@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260301091354_initial-migrate")]
+    [Migration("20260510194855_initialmigrate")]
     partial class initialmigrate
     {
         /// <inheritdoc />
@@ -207,6 +207,11 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
                     b.Property<string>("Solucion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -221,6 +226,9 @@ namespace Infrastructure.Migrations
                     b.HasIndex("CategoriaId");
 
                     b.HasIndex("CreadoPorId");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
 
                     b.ToTable("BaseConocimiento", (string)null);
                 });
@@ -358,6 +366,14 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EstadoId"));
 
+                    b.Property<string>("ColorHexa")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CssClass")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Descripcion")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -383,6 +399,8 @@ namespace Infrastructure.Migrations
                         new
                         {
                             EstadoId = 1,
+                            ColorHexa = "#6C757D",
+                            CssClass = "secondary",
                             Descripcion = "Incidencia recibida y pendiente de asignación",
                             EsEstadoFinal = false,
                             Nombre = "Registrado"
@@ -390,6 +408,8 @@ namespace Infrastructure.Migrations
                         new
                         {
                             EstadoId = 2,
+                            ColorHexa = "#0D6EFD",
+                            CssClass = "primary",
                             Descripcion = "Asignado a un técnico, pendiente de atención",
                             EsEstadoFinal = false,
                             Nombre = "Asignado"
@@ -397,6 +417,8 @@ namespace Infrastructure.Migrations
                         new
                         {
                             EstadoId = 3,
+                            ColorHexa = "#0DCAF0",
+                            CssClass = "info",
                             Descripcion = "El técnico está analizando la causa raíz",
                             EsEstadoFinal = false,
                             Nombre = "En Diagnóstico"
@@ -404,6 +426,8 @@ namespace Infrastructure.Migrations
                         new
                         {
                             EstadoId = 4,
+                            ColorHexa = "#FFC107",
+                            CssClass = "warning",
                             Descripcion = "Se está aplicando la solución",
                             EsEstadoFinal = false,
                             Nombre = "En Progreso"
@@ -411,6 +435,8 @@ namespace Infrastructure.Migrations
                         new
                         {
                             EstadoId = 5,
+                            ColorHexa = "#495057",
+                            CssClass = "dark",
                             Descripcion = "En espera de respuesta del solicitante o de un proveedor",
                             EsEstadoFinal = false,
                             Nombre = "Pendiente"
@@ -418,6 +444,8 @@ namespace Infrastructure.Migrations
                         new
                         {
                             EstadoId = 6,
+                            ColorHexa = "#198754",
+                            CssClass = "success",
                             Descripcion = "Solución aplicada, pendiente de confirmación del usuario",
                             EsEstadoFinal = false,
                             Nombre = "Resuelto"
@@ -425,6 +453,8 @@ namespace Infrastructure.Migrations
                         new
                         {
                             EstadoId = 7,
+                            ColorHexa = "#ADB5BD",
+                            CssClass = "secondary",
                             Descripcion = "Confirmado y cerrado formalmente",
                             EsEstadoFinal = true,
                             Nombre = "Cerrado"
@@ -432,6 +462,8 @@ namespace Infrastructure.Migrations
                         new
                         {
                             EstadoId = 8,
+                            ColorHexa = "#DC3545",
+                            CssClass = "danger",
                             Descripcion = "El usuario reportó que el problema persiste",
                             EsEstadoFinal = false,
                             Nombre = "Reabierto"
@@ -439,6 +471,8 @@ namespace Infrastructure.Migrations
                         new
                         {
                             EstadoId = 9,
+                            ColorHexa = "#E9ECEF",
+                            CssClass = "light",
                             Descripcion = "Incidencia anulada por el solicitante o administrador",
                             EsEstadoFinal = true,
                             Nombre = "Cancelado"
@@ -575,6 +609,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<int>("SedeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("SolicitanteId")
                         .HasColumnType("int");
 
@@ -610,6 +647,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique();
 
+                    b.HasIndex("SedeId");
+
                     b.HasIndex("SolicitanteId");
 
                     b.HasIndex("TecnicoAsignadoId");
@@ -625,6 +664,39 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.IncidenciaAdjunto", b =>
+                {
+                    b.Property<int>("IncidenciaAdjuntoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IncidenciaAdjuntoId"));
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IncidenciaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("NombreReal")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RutaContenedora")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IncidenciaAdjuntoId");
+
+                    b.HasIndex("IncidenciaId");
+
+                    b.ToTable("IncidenciaAdjuntos", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.NivelPrioridad", b =>
                 {
                     b.Property<int>("PrioridadId")
@@ -632,6 +704,25 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PrioridadId"));
+
+                    b.Property<string>("ColorHexa")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CssClass")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GuiaValor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("Impacto")
+                        .HasColumnType("tinyint");
 
                     b.Property<byte>("Nivel")
                         .HasColumnType("tinyint");
@@ -647,57 +738,194 @@ namespace Infrastructure.Migrations
                     b.Property<int>("TiempoRespuestaMin")
                         .HasColumnType("int");
 
-                    b.HasKey("PrioridadId");
+                    b.Property<byte>("Urgencia")
+                        .HasColumnType("tinyint");
 
-                    b.HasIndex("Nombre")
-                        .IsUnique();
+                    b.HasKey("PrioridadId");
 
                     b.ToTable("NivelesPrioridad", null, t =>
                         {
-                            t.HasCheckConstraint("CK_NivelPrioridad_Nivel", "[Nivel] BETWEEN 1 AND 5");
+                            t.HasCheckConstraint("CK_NivelPrioridad_Nivel", "[Nivel] BETWEEN 1 AND 4");
                         });
 
                     b.HasData(
                         new
                         {
                             PrioridadId = 1,
+                            ColorHexa = "#B91C1C",
+                            CssClass = "danger",
+                            Descripcion = "Impacto Alto + Urgencia Alta",
+                            GuiaValor = "ATENCIÓN INMEDIATA - El valor del servicio está severamente comprometido. Asignar recursos prioritarios y mantener comunicación constante con stakeholders.",
+                            Impacto = (byte)1,
                             Nivel = (byte)1,
                             Nombre = "Crítico",
                             TiempoResolucionMin = 60,
-                            TiempoRespuestaMin = 15
+                            TiempoRespuestaMin = 15,
+                            Urgencia = (byte)1
                         },
                         new
                         {
                             PrioridadId = 2,
+                            ColorHexa = "#EA580C",
+                            CssClass = "warning",
+                            Descripcion = "Impacto Alto + Urgencia Media",
+                            GuiaValor = "ALTA PRIORIDAD - Valor del servicio significativamente afectado. Coordinar recursos y establecer plan de acción claro con tiempos definidos.",
+                            Impacto = (byte)1,
                             Nivel = (byte)2,
                             Nombre = "Alto",
                             TiempoResolucionMin = 240,
-                            TiempoRespuestaMin = 30
+                            TiempoRespuestaMin = 30,
+                            Urgencia = (byte)2
                         },
                         new
                         {
                             PrioridadId = 3,
-                            Nivel = (byte)3,
-                            Nombre = "Medio",
-                            TiempoResolucionMin = 480,
-                            TiempoRespuestaMin = 60
+                            ColorHexa = "#EA580C",
+                            CssClass = "warning",
+                            Descripcion = "Impacto Medio + Urgencia Alta",
+                            GuiaValor = "ALTA PRIORIDAD - Requiere respuesta rápida aunque el impacto sea limitado. Asegurar que el usuario pueda continuar operaciones críticas.",
+                            Impacto = (byte)2,
+                            Nivel = (byte)2,
+                            Nombre = "Alto",
+                            TiempoResolucionMin = 240,
+                            TiempoRespuestaMin = 30,
+                            Urgencia = (byte)1
                         },
                         new
                         {
                             PrioridadId = 4,
-                            Nivel = (byte)4,
-                            Nombre = "Bajo",
-                            TiempoResolucionMin = 1440,
-                            TiempoRespuestaMin = 120
+                            ColorHexa = "#2563EB",
+                            CssClass = "info",
+                            Descripcion = "Impacto Alto + Urgencia Baja",
+                            GuiaValor = "PRIORIDAD MEDIA - Planificar resolución considerando impacto potencial. Puede coordinarse con otros cambios planificados.",
+                            Impacto = (byte)1,
+                            Nivel = (byte)3,
+                            Nombre = "Medio",
+                            TiempoResolucionMin = 480,
+                            TiempoRespuestaMin = 60,
+                            Urgencia = (byte)3
                         },
                         new
                         {
                             PrioridadId = 5,
-                            Nivel = (byte)5,
-                            Nombre = "Planificado",
-                            TiempoResolucionMin = 4320,
-                            TiempoRespuestaMin = 480
+                            ColorHexa = "#2563EB",
+                            CssClass = "info",
+                            Descripcion = "Impacto Medio + Urgencia Media",
+                            GuiaValor = "PRIORIDAD MEDIA - Gestión normal siguiendo procedimientos estándar. Mantener al usuario informado del progreso.",
+                            Impacto = (byte)2,
+                            Nivel = (byte)3,
+                            Nombre = "Medio",
+                            TiempoResolucionMin = 480,
+                            TiempoRespuestaMin = 60,
+                            Urgencia = (byte)2
+                        },
+                        new
+                        {
+                            PrioridadId = 6,
+                            ColorHexa = "#2563EB",
+                            CssClass = "info",
+                            Descripcion = "Impacto Bajo + Urgencia Alta",
+                            GuiaValor = "PRIORIDAD MEDIA - Respuesta rápida con bajo impacto. Buscar soluciones rápidas o workarounds temporales.",
+                            Impacto = (byte)3,
+                            Nivel = (byte)3,
+                            Nombre = "Medio",
+                            TiempoResolucionMin = 480,
+                            TiempoRespuestaMin = 60,
+                            Urgencia = (byte)1
+                        },
+                        new
+                        {
+                            PrioridadId = 7,
+                            ColorHexa = "#15803D",
+                            CssClass = "success",
+                            Descripcion = "Impacto Medio + Urgencia Baja",
+                            GuiaValor = "BAJA PRIORIDAD - Gestionar en backlog normal. Puede agruparse con otras tareas similares para eficiencia.",
+                            Impacto = (byte)2,
+                            Nivel = (byte)4,
+                            Nombre = "Bajo",
+                            TiempoResolucionMin = 1440,
+                            TiempoRespuestaMin = 120,
+                            Urgencia = (byte)3
+                        },
+                        new
+                        {
+                            PrioridadId = 8,
+                            ColorHexa = "#15803D",
+                            CssClass = "success",
+                            Descripcion = "Impacto Bajo + Urgencia Media",
+                            GuiaValor = "BAJA PRIORIDAD - Resolver cuando sea posible. Mantener comunicación básica con usuario.",
+                            Impacto = (byte)3,
+                            Nivel = (byte)4,
+                            Nombre = "Bajo",
+                            TiempoResolucionMin = 1440,
+                            TiempoRespuestaMin = 120,
+                            Urgencia = (byte)2
+                        },
+                        new
+                        {
+                            PrioridadId = 9,
+                            ColorHexa = "#15803D",
+                            CssClass = "success",
+                            Descripcion = "Impacto Bajo + Urgencia Baja",
+                            GuiaValor = "BAJA PRIORIDAD - Mínimo impacto en el valor. Puede postergarse si surgen prioridades mayores.",
+                            Impacto = (byte)3,
+                            Nivel = (byte)4,
+                            Nombre = "Bajo",
+                            TiempoResolucionMin = 1440,
+                            TiempoRespuestaMin = 120,
+                            Urgencia = (byte)3
                         });
+                });
+
+            modelBuilder.Entity("Domain.Entities.Permiso", b =>
+                {
+                    b.Property<int>("PermisoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermisoId"));
+
+                    b.Property<string>("Controlador")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("PermisoId");
+
+                    b.ToTable("Permisos", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.PermisoRol", b =>
+                {
+                    b.Property<int>("PermisoRolId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermisoRolId"));
+
+                    b.Property<int>("PermisoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RolId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PermisoRolId");
+
+                    b.HasIndex("PermisoId");
+
+                    b.HasIndex("RolId");
+
+                    b.ToTable("PermisosRol", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Rol", b =>
@@ -745,6 +973,46 @@ namespace Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.Sede", b =>
+                {
+                    b.Property<int>("SedeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SedeId"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("SedeIdExterno")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TipoSede")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("SedeId");
+
+                    b.ToTable("Sedes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            SedeId = 1,
+                            Nombre = "DAMASCO",
+                            SedeIdExterno = 68,
+                            TipoSede = "SALA"
+                        },
+                        new
+                        {
+                            SedeId = 2,
+                            Nombre = "EXCALIBUR",
+                            SedeIdExterno = 36,
+                            TipoSede = "SALA"
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.Usuario", b =>
                 {
                     b.Property<int>("UsuarioId")
@@ -773,6 +1041,11 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
 
+                    b.Property<bool>("HasFullAccess")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -791,17 +1064,102 @@ namespace Infrastructure.Migrations
                     b.Property<int>("RolId")
                         .HasColumnType("int");
 
-                    b.HasKey("UsuarioId");
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
+                    b.HasKey("UsuarioId");
 
                     b.HasIndex("PublicId")
                         .IsUnique();
 
                     b.HasIndex("RolId");
 
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
                     b.ToTable("Usuarios", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UsuarioId = 1,
+                            Activo = true,
+                            Apellidos = "Canchari",
+                            Email = "diego.canchari@designdevsoftware.com",
+                            FechaCreacion = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            HasFullAccess = true,
+                            Nombre = "Diego",
+                            PasswordHash = "$2a$11$2oABfgbGT3nu0gKBQ1C4h.uncd85k9GNxndr8ehlu.yGmtkMhBFse",
+                            PublicId = new Guid("8d04dce2-969a-435d-bba4-df3f325983dc"),
+                            RolId = 1,
+                            UserName = "d.cancharir"
+                        },
+                        new
+                        {
+                            UsuarioId = 2,
+                            Activo = true,
+                            Apellidos = "Perez",
+                            Email = "diego.canchari@designdevsoftware.com",
+                            FechaCreacion = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            HasFullAccess = false,
+                            Nombre = "Juan",
+                            PasswordHash = "$2a$11$2oABfgbGT3nu0gKBQ1C4h.uncd85k9GNxndr8ehlu.yGmtkMhBFse",
+                            PublicId = new Guid("716578a3-4371-4894-a63d-435e4c0cd3b8"),
+                            RolId = 1,
+                            UserName = "administrador"
+                        },
+                        new
+                        {
+                            UsuarioId = 3,
+                            Activo = true,
+                            Apellidos = "Fernandez",
+                            Email = "diego.canchari@designdevsoftware.com",
+                            FechaCreacion = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            HasFullAccess = false,
+                            Nombre = "Carlos",
+                            PasswordHash = "$2a$11$2oABfgbGT3nu0gKBQ1C4h.uncd85k9GNxndr8ehlu.yGmtkMhBFse",
+                            PublicId = new Guid("507da209-c3a9-45e3-aaff-3cf7d334b125"),
+                            RolId = 1,
+                            UserName = "tecnico"
+                        },
+                        new
+                        {
+                            UsuarioId = 4,
+                            Activo = true,
+                            Apellidos = "Lopez",
+                            Email = "diego.canchari@designdevsoftware.com",
+                            FechaCreacion = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            HasFullAccess = false,
+                            Nombre = "Mario",
+                            PasswordHash = "$2a$11$2oABfgbGT3nu0gKBQ1C4h.uncd85k9GNxndr8ehlu.yGmtkMhBFse",
+                            PublicId = new Guid("4cfa9c79-62b8-49cd-aef7-70f593511d6d"),
+                            RolId = 1,
+                            UserName = "solicitante"
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.UsuarioSede", b =>
+                {
+                    b.Property<int>("UsuarioSedeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsuarioSedeId"));
+
+                    b.Property<int>("SedeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UsuarioSedeId");
+
+                    b.HasIndex("SedeId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("UsuarioSede", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.AcuerdoNivelServicio", b =>
@@ -909,6 +1267,12 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.Sede", "Sede")
+                        .WithMany("Incidencias")
+                        .HasForeignKey("SedeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Usuario", "Solicitante")
                         .WithMany("IncidenciasComoSolicitante")
                         .HasForeignKey("SolicitanteId")
@@ -930,9 +1294,41 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("NivelPrioridad");
 
+                    b.Navigation("Sede");
+
                     b.Navigation("Solicitante");
 
                     b.Navigation("TecnicoAsignado");
+                });
+
+            modelBuilder.Entity("Domain.Entities.IncidenciaAdjunto", b =>
+                {
+                    b.HasOne("Domain.Entities.Incidencia", "Incidencia")
+                        .WithMany("Adjuntos")
+                        .HasForeignKey("IncidenciaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Incidencia");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PermisoRol", b =>
+                {
+                    b.HasOne("Domain.Entities.Permiso", "Permiso")
+                        .WithMany("PermisoRoles")
+                        .HasForeignKey("PermisoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Rol", "Rol")
+                        .WithMany("PermisoRoles")
+                        .HasForeignKey("RolId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Permiso");
+
+                    b.Navigation("Rol");
                 });
 
             modelBuilder.Entity("Domain.Entities.Usuario", b =>
@@ -944,6 +1340,25 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Rol");
+                });
+
+            modelBuilder.Entity("Domain.Entities.UsuarioSede", b =>
+                {
+                    b.HasOne("Domain.Entities.Sede", "Sede")
+                        .WithMany("UsuarioSedes")
+                        .HasForeignKey("SedeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Usuario", "Usuario")
+                        .WithMany("UsuarioSedes")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Sede");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Domain.Entities.Categoria", b =>
@@ -962,6 +1377,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Incidencia", b =>
                 {
+                    b.Navigation("Adjuntos");
+
                     b.Navigation("Comentarios");
 
                     b.Navigation("Historial");
@@ -974,9 +1391,23 @@ namespace Infrastructure.Migrations
                     b.Navigation("Incidencias");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Permiso", b =>
+                {
+                    b.Navigation("PermisoRoles");
+                });
+
             modelBuilder.Entity("Domain.Entities.Rol", b =>
                 {
+                    b.Navigation("PermisoRoles");
+
                     b.Navigation("Usuarios");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Sede", b =>
+                {
+                    b.Navigation("Incidencias");
+
+                    b.Navigation("UsuarioSedes");
                 });
 
             modelBuilder.Entity("Domain.Entities.Usuario", b =>
@@ -994,6 +1425,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("IncidenciasComoTecnico");
 
                     b.Navigation("IncidenciasEscaladas");
+
+                    b.Navigation("UsuarioSedes");
                 });
 #pragma warning restore 612, 618
         }

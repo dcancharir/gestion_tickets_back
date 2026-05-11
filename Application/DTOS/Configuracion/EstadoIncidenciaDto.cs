@@ -4,4 +4,4 @@ using System.Text;
 
 namespace Application.DTOS.Configuracion;
 
-public record EstadoIncidenciaDto(int EstadoId, string Nombre, string? Descripcion, bool EsEstadoFinal);
+public record EstadoIncidenciaDto(int EstadoId, string Nombre, string? Descripcion, bool EsEstadoFinal,string CssClass,string ColorHexa);

@@ -9,4 +9,5 @@ public class Sede
     public string Nombre { get; set; } = null!;
     public string TipoSede { get; set; } = null!;
     public ICollection<Incidencia> Incidencias { get; set; } = new List<Incidencia>();
+    public ICollection<UsuarioSede> UsuarioSedes { get; set; } = new List<UsuarioSede>();
 }

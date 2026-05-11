@@ -28,6 +28,6 @@ public class ActualizarNivelPrioridadHandler : ICommandHandler<ActualizarNivelPr
         nivel.TiempoResolucionMin = cmd.TiempoResolucionMin;
 
         var actualizado = await _repo.ActualizarAsync(nivel, ct);
-        return new NivelPrioridadDto(actualizado.PrioridadId, actualizado.Nombre, actualizado.Nivel, actualizado.TiempoRespuestaMin, actualizado.TiempoResolucionMin);
+        return new NivelPrioridadDto(actualizado.PrioridadId, actualizado.Nombre, actualizado.Nivel, actualizado.TiempoRespuestaMin, actualizado.TiempoResolucionMin,actualizado.CssClass,actualizado.ColorHexa);
     }
 }

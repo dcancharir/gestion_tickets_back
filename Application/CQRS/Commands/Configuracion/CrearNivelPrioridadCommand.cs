@@ -26,6 +26,7 @@ public class CrearNivelPrioridadHandler : ICommandHandler<CrearNivelPrioridadCom
             TiempoResolucionMin = cmd.TiempoResolucionMin
         };
         var creado = await _repo.CrearAsync(nivel, ct);
-        return new NivelPrioridadDto(creado.PrioridadId, creado.Nombre, creado.Nivel, creado.TiempoRespuestaMin, creado.TiempoResolucionMin);
+        return new NivelPrioridadDto(creado.PrioridadId, creado.Nombre, creado.Nivel, creado.TiempoRespuestaMin, creado.TiempoResolucionMin,creado.CssClass
+            ,creado.ColorHexa);
     }
 }

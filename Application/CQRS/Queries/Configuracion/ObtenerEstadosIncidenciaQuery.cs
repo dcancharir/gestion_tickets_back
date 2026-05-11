@@ -15,6 +15,6 @@ public class ObtenerEstadosIncidenciaHandler : IQueryHandler<ObtenerEstadosIncid
 
     public async Task<IEnumerable<EstadoIncidenciaDto>> HandleAsync(ObtenerEstadosIncidenciaQuery q, CancellationToken ct = default) {
         var estados = await _repo.ObtenerTodosAsync(ct);
-        return estados.Select(e => new EstadoIncidenciaDto(e.EstadoId, e.Nombre, e.Descripcion, e.EsEstadoFinal));
+        return estados.Select(e => new EstadoIncidenciaDto(e.EstadoId, e.Nombre, e.Descripcion, e.EsEstadoFinal, e.CssClass, e.ColorHexa));
     }
 }

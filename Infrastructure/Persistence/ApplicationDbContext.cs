@@ -27,6 +27,7 @@ public class ApplicationDbContext : DbContext {
     public DbSet<Permiso> Permisos { get; set; }
     public DbSet<IncidenciaAdjunto> IncidenciaAdjuntos { get; set; }
     public DbSet<Sede> Sedes { get; set; }
+    public DbSet<UsuarioSede> UsuarioSede { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);

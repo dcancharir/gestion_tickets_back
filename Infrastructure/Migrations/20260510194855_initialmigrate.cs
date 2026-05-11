@@ -36,7 +36,9 @@ namespace Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nombre = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Descripcion = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    EsEstadoFinal = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                    EsEstadoFinal = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    ColorHexa = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CssClass = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,15 +51,36 @@ namespace Infrastructure.Migrations
                 {
                     PrioridadId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Impacto = table.Column<byte>(type: "tinyint", nullable: false),
+                    Urgencia = table.Column<byte>(type: "tinyint", nullable: false),
                     Nombre = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Nivel = table.Column<byte>(type: "tinyint", nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TiempoRespuestaMin = table.Column<int>(type: "int", nullable: false),
-                    TiempoResolucionMin = table.Column<int>(type: "int", nullable: false)
+                    TiempoResolucionMin = table.Column<int>(type: "int", nullable: false),
+                    ColorHexa = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CssClass = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GuiaValor = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NivelesPrioridad", x => x.PrioridadId);
-                    table.CheckConstraint("CK_NivelPrioridad_Nivel", "[Nivel] BETWEEN 1 AND 5");
+                    table.CheckConstraint("CK_NivelPrioridad_Nivel", "[Nivel] BETWEEN 1 AND 4");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Permisos",
+                columns: table => new
+                {
+                    PermisoId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nombre = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Tipo = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Controlador = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Permisos", x => x.PermisoId);
                 });
 
             migrationBuilder.CreateTable(
@@ -72,6 +95,21 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.RolId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Sedes",
+                columns: table => new
+                {
+                    SedeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SedeIdExterno = table.Column<int>(type: "int", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(250)", nullable: false),
+                    TipoSede = table.Column<string>(type: "nvarchar(250)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sedes", x => x.SedeId);
                 });
 
             migrationBuilder.CreateTable(
@@ -104,6 +142,32 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PermisosRol",
+                columns: table => new
+                {
+                    PermisoRolId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PermisoId = table.Column<int>(type: "int", nullable: false),
+                    RolId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PermisosRol", x => x.PermisoRolId);
+                    table.ForeignKey(
+                        name: "FK_PermisosRol_Permisos_PermisoId",
+                        column: x => x.PermisoId,
+                        principalTable: "Permisos",
+                        principalColumn: "PermisoId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PermisosRol_Roles_RolId",
+                        column: x => x.RolId,
+                        principalTable: "Roles",
+                        principalColumn: "RolId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Usuarios",
                 columns: table => new
                 {
@@ -116,7 +180,9 @@ namespace Infrastructure.Migrations
                     PasswordHash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     RolId = table.Column<int>(type: "int", nullable: false),
                     Activo = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
+                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    UserName = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    HasFullAccess = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
@@ -135,6 +201,7 @@ namespace Infrastructure.Migrations
                 {
                     ArticuloId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    PublicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     CategoriaId = table.Column<int>(type: "int", nullable: true),
                     Titulo = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Problema = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -191,7 +258,8 @@ namespace Infrastructure.Migrations
                     FechaResolucion = table.Column<DateTime>(type: "datetime2", nullable: true),
                     FechaCierre = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CerradoPorId = table.Column<int>(type: "int", nullable: true),
-                    FechaUltimaActualizacion = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
+                    FechaUltimaActualizacion = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    SedeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -217,6 +285,12 @@ namespace Infrastructure.Migrations
                         principalColumn: "PrioridadId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
+                        name: "FK_Incidencias_Sedes_SedeId",
+                        column: x => x.SedeId,
+                        principalTable: "Sedes",
+                        principalColumn: "SedeId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Incidencias_Usuarios_CerradoPorId",
                         column: x => x.CerradoPorId,
                         principalTable: "Usuarios",
@@ -237,6 +311,32 @@ namespace Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Incidencias_Usuarios_TecnicoAsignadoId",
                         column: x => x.TecnicoAsignadoId,
+                        principalTable: "Usuarios",
+                        principalColumn: "UsuarioId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UsuarioSede",
+                columns: table => new
+                {
+                    UsuarioSedeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UsuarioId = table.Column<int>(type: "int", nullable: false),
+                    SedeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UsuarioSede", x => x.UsuarioSedeId);
+                    table.ForeignKey(
+                        name: "FK_UsuarioSede_Sedes_SedeId",
+                        column: x => x.SedeId,
+                        principalTable: "Sedes",
+                        principalColumn: "SedeId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UsuarioSede_Usuarios_UsuarioId",
+                        column: x => x.UsuarioId,
                         principalTable: "Usuarios",
                         principalColumn: "UsuarioId",
                         onDelete: ReferentialAction.Restrict);
@@ -302,6 +402,29 @@ namespace Infrastructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "IncidenciaAdjuntos",
+                columns: table => new
+                {
+                    IncidenciaAdjuntoId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IncidenciaId = table.Column<int>(type: "int", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(250)", nullable: false),
+                    RutaContenedora = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NombreReal = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IncidenciaAdjuntos", x => x.IncidenciaAdjuntoId);
+                    table.ForeignKey(
+                        name: "FK_IncidenciaAdjuntos_Incidencias_IncidenciaId",
+                        column: x => x.IncidenciaId,
+                        principalTable: "Incidencias",
+                        principalColumn: "IncidenciaId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Categorias",
                 columns: new[] { "CategoriaId", "Activo", "Descripcion", "Nombre" },
@@ -319,42 +442,46 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "EstadosIncidencia",
-                columns: new[] { "EstadoId", "Descripcion", "Nombre" },
+                columns: new[] { "EstadoId", "ColorHexa", "CssClass", "Descripcion", "Nombre" },
                 values: new object[,]
                 {
-                    { 1, "Incidencia recibida y pendiente de asignación", "Registrado" },
-                    { 2, "Asignado a un técnico, pendiente de atención", "Asignado" },
-                    { 3, "El técnico está analizando la causa raíz", "En Diagnóstico" },
-                    { 4, "Se está aplicando la solución", "En Progreso" },
-                    { 5, "En espera de respuesta del solicitante o de un proveedor", "Pendiente" },
-                    { 6, "Solución aplicada, pendiente de confirmación del usuario", "Resuelto" }
+                    { 1, "#6C757D", "secondary", "Incidencia recibida y pendiente de asignación", "Registrado" },
+                    { 2, "#0D6EFD", "primary", "Asignado a un técnico, pendiente de atención", "Asignado" },
+                    { 3, "#0DCAF0", "info", "El técnico está analizando la causa raíz", "En Diagnóstico" },
+                    { 4, "#FFC107", "warning", "Se está aplicando la solución", "En Progreso" },
+                    { 5, "#495057", "dark", "En espera de respuesta del solicitante o de un proveedor", "Pendiente" },
+                    { 6, "#198754", "success", "Solución aplicada, pendiente de confirmación del usuario", "Resuelto" }
                 });
 
             migrationBuilder.InsertData(
                 table: "EstadosIncidencia",
-                columns: new[] { "EstadoId", "Descripcion", "EsEstadoFinal", "Nombre" },
-                values: new object[] { 7, "Confirmado y cerrado formalmente", true, "Cerrado" });
+                columns: new[] { "EstadoId", "ColorHexa", "CssClass", "Descripcion", "EsEstadoFinal", "Nombre" },
+                values: new object[] { 7, "#ADB5BD", "secondary", "Confirmado y cerrado formalmente", true, "Cerrado" });
 
             migrationBuilder.InsertData(
                 table: "EstadosIncidencia",
-                columns: new[] { "EstadoId", "Descripcion", "Nombre" },
-                values: new object[] { 8, "El usuario reportó que el problema persiste", "Reabierto" });
+                columns: new[] { "EstadoId", "ColorHexa", "CssClass", "Descripcion", "Nombre" },
+                values: new object[] { 8, "#DC3545", "danger", "El usuario reportó que el problema persiste", "Reabierto" });
 
             migrationBuilder.InsertData(
                 table: "EstadosIncidencia",
-                columns: new[] { "EstadoId", "Descripcion", "EsEstadoFinal", "Nombre" },
-                values: new object[] { 9, "Incidencia anulada por el solicitante o administrador", true, "Cancelado" });
+                columns: new[] { "EstadoId", "ColorHexa", "CssClass", "Descripcion", "EsEstadoFinal", "Nombre" },
+                values: new object[] { 9, "#E9ECEF", "light", "Incidencia anulada por el solicitante o administrador", true, "Cancelado" });
 
             migrationBuilder.InsertData(
                 table: "NivelesPrioridad",
-                columns: new[] { "PrioridadId", "Nivel", "Nombre", "TiempoResolucionMin", "TiempoRespuestaMin" },
+                columns: new[] { "PrioridadId", "ColorHexa", "CssClass", "Descripcion", "GuiaValor", "Impacto", "Nivel", "Nombre", "TiempoResolucionMin", "TiempoRespuestaMin", "Urgencia" },
                 values: new object[,]
                 {
-                    { 1, (byte)1, "Crítico", 60, 15 },
-                    { 2, (byte)2, "Alto", 240, 30 },
-                    { 3, (byte)3, "Medio", 480, 60 },
-                    { 4, (byte)4, "Bajo", 1440, 120 },
-                    { 5, (byte)5, "Planificado", 4320, 480 }
+                    { 1, "#B91C1C", "danger", "Impacto Alto + Urgencia Alta", "ATENCIÓN INMEDIATA - El valor del servicio está severamente comprometido. Asignar recursos prioritarios y mantener comunicación constante con stakeholders.", (byte)1, (byte)1, "Crítico", 60, 15, (byte)1 },
+                    { 2, "#EA580C", "warning", "Impacto Alto + Urgencia Media", "ALTA PRIORIDAD - Valor del servicio significativamente afectado. Coordinar recursos y establecer plan de acción claro con tiempos definidos.", (byte)1, (byte)2, "Alto", 240, 30, (byte)2 },
+                    { 3, "#EA580C", "warning", "Impacto Medio + Urgencia Alta", "ALTA PRIORIDAD - Requiere respuesta rápida aunque el impacto sea limitado. Asegurar que el usuario pueda continuar operaciones críticas.", (byte)2, (byte)2, "Alto", 240, 30, (byte)1 },
+                    { 4, "#2563EB", "info", "Impacto Alto + Urgencia Baja", "PRIORIDAD MEDIA - Planificar resolución considerando impacto potencial. Puede coordinarse con otros cambios planificados.", (byte)1, (byte)3, "Medio", 480, 60, (byte)3 },
+                    { 5, "#2563EB", "info", "Impacto Medio + Urgencia Media", "PRIORIDAD MEDIA - Gestión normal siguiendo procedimientos estándar. Mantener al usuario informado del progreso.", (byte)2, (byte)3, "Medio", 480, 60, (byte)2 },
+                    { 6, "#2563EB", "info", "Impacto Bajo + Urgencia Alta", "PRIORIDAD MEDIA - Respuesta rápida con bajo impacto. Buscar soluciones rápidas o workarounds temporales.", (byte)3, (byte)3, "Medio", 480, 60, (byte)1 },
+                    { 7, "#15803D", "success", "Impacto Medio + Urgencia Baja", "BAJA PRIORIDAD - Gestionar en backlog normal. Puede agruparse con otras tareas similares para eficiencia.", (byte)2, (byte)4, "Bajo", 1440, 120, (byte)3 },
+                    { 8, "#15803D", "success", "Impacto Bajo + Urgencia Media", "BAJA PRIORIDAD - Resolver cuando sea posible. Mantener comunicación básica con usuario.", (byte)3, (byte)4, "Bajo", 1440, 120, (byte)2 },
+                    { 9, "#15803D", "success", "Impacto Bajo + Urgencia Baja", "BAJA PRIORIDAD - Mínimo impacto en el valor. Puede postergarse si surgen prioridades mayores.", (byte)3, (byte)4, "Bajo", 1440, 120, (byte)3 }
                 });
 
             migrationBuilder.InsertData(
@@ -365,6 +492,15 @@ namespace Infrastructure.Migrations
                     { 1, "Acceso total al sistema", "Administrador" },
                     { 2, "Gestiona y resuelve incidencias", "Técnico" },
                     { 3, "Registra y da seguimiento a sus tickets", "Solicitante" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Sedes",
+                columns: new[] { "SedeId", "Nombre", "SedeIdExterno", "TipoSede" },
+                values: new object[,]
+                {
+                    { 1, "DAMASCO", 68, "SALA" },
+                    { 2, "EXCALIBUR", 36, "SALA" }
                 });
 
             migrationBuilder.InsertData(
@@ -387,6 +523,21 @@ namespace Infrastructure.Migrations
                     { 13, true, 7, 4, 1440, 120 }
                 });
 
+            migrationBuilder.InsertData(
+                table: "Usuarios",
+                columns: new[] { "UsuarioId", "Activo", "Apellidos", "Email", "FechaCreacion", "HasFullAccess", "Nombre", "PasswordHash", "PublicId", "RolId", "UserName" },
+                values: new object[] { 1, true, "Canchari", "diego.canchari@designdevsoftware.com", new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Diego", "$2a$11$2oABfgbGT3nu0gKBQ1C4h.uncd85k9GNxndr8ehlu.yGmtkMhBFse", new Guid("8d04dce2-969a-435d-bba4-df3f325983dc"), 1, "d.cancharir" });
+
+            migrationBuilder.InsertData(
+                table: "Usuarios",
+                columns: new[] { "UsuarioId", "Activo", "Apellidos", "Email", "FechaCreacion", "Nombre", "PasswordHash", "PublicId", "RolId", "UserName" },
+                values: new object[,]
+                {
+                    { 2, true, "Perez", "diego.canchari@designdevsoftware.com", new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), "Juan", "$2a$11$2oABfgbGT3nu0gKBQ1C4h.uncd85k9GNxndr8ehlu.yGmtkMhBFse", new Guid("716578a3-4371-4894-a63d-435e4c0cd3b8"), 1, "administrador" },
+                    { 3, true, "Fernandez", "diego.canchari@designdevsoftware.com", new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), "Carlos", "$2a$11$2oABfgbGT3nu0gKBQ1C4h.uncd85k9GNxndr8ehlu.yGmtkMhBFse", new Guid("507da209-c3a9-45e3-aaff-3cf7d334b125"), 1, "tecnico" },
+                    { 4, true, "Lopez", "diego.canchari@designdevsoftware.com", new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), "Mario", "$2a$11$2oABfgbGT3nu0gKBQ1C4h.uncd85k9GNxndr8ehlu.yGmtkMhBFse", new Guid("4cfa9c79-62b8-49cd-aef7-70f593511d6d"), 1, "solicitante" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AcuerdosNivelServicio_CategoriaId_PrioridadId",
                 table: "AcuerdosNivelServicio",
@@ -407,6 +558,12 @@ namespace Infrastructure.Migrations
                 name: "IX_BaseConocimiento_CreadoPorId",
                 table: "BaseConocimiento",
                 column: "CreadoPorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaseConocimiento_PublicId",
+                table: "BaseConocimiento",
+                column: "PublicId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Categorias_Nombre",
@@ -439,6 +596,11 @@ namespace Infrastructure.Migrations
                 name: "IX_HistorialIncidencias_UsuarioId",
                 table: "HistorialIncidencias",
                 column: "UsuarioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IncidenciaAdjuntos_IncidenciaId",
+                table: "IncidenciaAdjuntos",
+                column: "IncidenciaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Incidencias_CategoriaId",
@@ -483,6 +645,11 @@ namespace Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Incidencias_SedeId",
+                table: "Incidencias",
+                column: "SedeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Incidencias_SolicitanteId",
                 table: "Incidencias",
                 column: "SolicitanteId");
@@ -493,21 +660,19 @@ namespace Infrastructure.Migrations
                 column: "TecnicoAsignadoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NivelesPrioridad_Nombre",
-                table: "NivelesPrioridad",
-                column: "Nombre",
-                unique: true);
+                name: "IX_PermisosRol_PermisoId",
+                table: "PermisosRol",
+                column: "PermisoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PermisosRol_RolId",
+                table: "PermisosRol",
+                column: "RolId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Nombre",
                 table: "Roles",
                 column: "Nombre",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Usuarios_Email",
-                table: "Usuarios",
-                column: "Email",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -520,6 +685,22 @@ namespace Infrastructure.Migrations
                 name: "IX_Usuarios_RolId",
                 table: "Usuarios",
                 column: "RolId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Usuarios_UserName",
+                table: "Usuarios",
+                column: "UserName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UsuarioSede_SedeId",
+                table: "UsuarioSede",
+                column: "SedeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UsuarioSede_UsuarioId",
+                table: "UsuarioSede",
+                column: "UsuarioId");
         }
 
         /// <inheritdoc />
@@ -538,7 +719,19 @@ namespace Infrastructure.Migrations
                 name: "HistorialIncidencias");
 
             migrationBuilder.DropTable(
+                name: "IncidenciaAdjuntos");
+
+            migrationBuilder.DropTable(
+                name: "PermisosRol");
+
+            migrationBuilder.DropTable(
+                name: "UsuarioSede");
+
+            migrationBuilder.DropTable(
                 name: "Incidencias");
+
+            migrationBuilder.DropTable(
+                name: "Permisos");
 
             migrationBuilder.DropTable(
                 name: "Categorias");
@@ -548,6 +741,9 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "NivelesPrioridad");
+
+            migrationBuilder.DropTable(
+                name: "Sedes");
 
             migrationBuilder.DropTable(
                 name: "Usuarios");

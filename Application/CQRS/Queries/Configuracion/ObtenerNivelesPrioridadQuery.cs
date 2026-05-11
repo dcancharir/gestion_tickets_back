@@ -15,6 +15,6 @@ public class ObtenerNivelesPrioridadHandler : IQueryHandler<ObtenerNivelesPriori
 
     public async Task<IEnumerable<NivelPrioridadDto>> HandleAsync(ObtenerNivelesPrioridadQuery q, CancellationToken ct = default) {
         var niveles = await _repo.ObtenerTodosAsync(ct);
-        return niveles.Select(n => new NivelPrioridadDto(n.PrioridadId, n.Nombre, n.Nivel, n.TiempoRespuestaMin, n.TiempoResolucionMin));
+        return niveles.Select(n => new NivelPrioridadDto(n.PrioridadId, n.Nombre, n.Nivel, n.TiempoRespuestaMin, n.TiempoResolucionMin, n.CssClass, n.ColorHexa));
     }
 }

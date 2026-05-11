@@ -21,6 +21,6 @@ public class CrearEstadoHandler : ICommandHandler<CrearEstadoCommand, EstadoInci
 
         var estado = new EstadoIncidencia { Nombre = cmd.Nombre, Descripcion = cmd.Descripcion, EsEstadoFinal = cmd.EsEstadoFinal };
         var creado = await _repo.CrearAsync(estado, ct);
-        return new EstadoIncidenciaDto(creado.EstadoId, creado.Nombre, creado.Descripcion, creado.EsEstadoFinal);
+        return new EstadoIncidenciaDto(creado.EstadoId, creado.Nombre, creado.Descripcion, creado.EsEstadoFinal,creado.CssClass,creado.ColorHexa);
     }
 }

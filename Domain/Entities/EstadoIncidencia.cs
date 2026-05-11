@@ -24,4 +24,6 @@ public class EstadoIncidencia {
 
     // Navegación
     public ICollection<Incidencia> Incidencias { get; set; } = new List<Incidencia>();
+    public string ColorHexa { get; set; } = string.Empty;
+    public string CssClass { get; set; } = string.Empty;
 }

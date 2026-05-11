@@ -27,6 +27,9 @@ public class Usuario {
     public ICollection<HistorialIncidencia> HistorialAcciones { get; set; } = new List<HistorialIncidencia>();
     public ICollection<ComentarioIncidencia> Comentarios { get; set; } = new List<ComentarioIncidencia>();
     public ICollection<BaseConocimiento> ArticulosCreados { get; set; } = new List<BaseConocimiento>();
+    public ICollection<UsuarioSede> UsuarioSedes { get; set; } = new List<UsuarioSede>();
     public string UserName { get; set; } = string.Empty;
+    public bool HasFullAccess { get; set; } = false;
+
 }
 

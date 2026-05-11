@@ -9,5 +9,7 @@ public record NivelPrioridadDto(
     string Nombre,
     byte Nivel,
     int TiempoRespuestaMin,
-    int TiempoResolucionMin
+    int TiempoResolucionMin,
+    string CssClass,
+    string ColorHexa
 );

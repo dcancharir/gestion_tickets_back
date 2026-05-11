@@ -27,6 +27,6 @@ public class ActualizarEstadoHandler : ICommandHandler<ActualizarEstadoCommand, 
         estado.EsEstadoFinal = cmd.EsEstadoFinal;
 
         var actualizado = await _repo.ActualizarAsync(estado, ct);
-        return new EstadoIncidenciaDto(actualizado.EstadoId, actualizado.Nombre, actualizado.Descripcion, actualizado.EsEstadoFinal);
+        return new EstadoIncidenciaDto(actualizado.EstadoId, actualizado.Nombre, actualizado.Descripcion, actualizado.EsEstadoFinal,actualizado.CssClass,actualizado.ColorHexa);
     }
 }

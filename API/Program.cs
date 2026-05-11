@@ -119,7 +119,7 @@ app.UseAuthentication();  // antes de UseAuthorization
 
 app.UseAuthorization();
 
-app.UseMiddleware<RolePermissionMiddleware>();
+//app.UseMiddleware<RolePermissionMiddleware>();
 app.MapControllers();
 
 app.Run();
