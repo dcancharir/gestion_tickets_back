@@ -113,6 +113,7 @@ if(app.Environment.IsDevelopment()) {
     });
 }
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseCors("Angular");
 app.UseAuthentication();  // antes de UseAuthorization

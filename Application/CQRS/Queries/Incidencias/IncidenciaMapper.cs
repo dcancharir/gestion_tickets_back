@@ -1,4 +1,5 @@
-﻿using Application.DTOS.Incidencias;
+﻿using Application.DTOS.IncidenciaAdjuntos;
+using Application.DTOS.Incidencias;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,8 @@ internal static class IncidenciaMapper {
     internal static IncidenciaDetalleDto ToDetalle(
         Incidencia i,
         IEnumerable<HistorialIncidencia> historial,
-        IEnumerable<ComentarioIncidencia> comentarios) => new(
+        IEnumerable<ComentarioIncidencia> comentarios,
+        IEnumerable<IncidenciaAdjunto> adjuntos) => new(
         i.PublicId,
         i.NumeroTicket,
         i.Titulo,
@@ -80,6 +82,14 @@ internal static class IncidenciaMapper {
             $"{c.Usuario.Nombre} {c.Usuario.Apellidos}",
             c.Usuario.PublicId,
             c.FechaComentario
+        )),
+        adjuntos.Select(a => new IncidenciaAdjuntoDto(
+            a.IncidenciaAdjuntoId,
+            a.IncidenciaId,
+            a.Nombre,
+            a.RutaContenedora,
+            a.NombreReal,
+            a.FechaCreacion
         ))
     );
 }

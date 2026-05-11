@@ -18,16 +18,21 @@ public record ObtenerIncidenciaPorPublicIdQuery(Guid PublicId) : IQuery<Incidenc
 public class ObtenerIncidenciaPorPublicIdHandler
     : IQueryHandler<ObtenerIncidenciaPorPublicIdQuery, IncidenciaDetalleDto> {
     private readonly IIncidenciaRepository _repo;
-    public ObtenerIncidenciaPorPublicIdHandler(IIncidenciaRepository repo) => _repo = repo;
+    private readonly IIncidenciaAdjuntoRepository _adjuntoRepo;
+    public ObtenerIncidenciaPorPublicIdHandler(IIncidenciaRepository repo, IIncidenciaAdjuntoRepository adjuntoRepo) {
+        _repo = repo;
+        _adjuntoRepo = adjuntoRepo;
+    }
 
     public async Task<IncidenciaDetalleDto> HandleAsync(
         ObtenerIncidenciaPorPublicIdQuery query, CancellationToken ct = default) {
         var incidencia = await _repo.ObtenerPorPublicIdAsync(query.PublicId, ct)
             ?? throw new NotFoundException(nameof(Incidencia), query.PublicId);
 
-        var historial = await _repo.ObtenerHistorialAsync(incidencia.IncidenciaId, ct);
+        var historial   = await _repo.ObtenerHistorialAsync(incidencia.IncidenciaId, ct);
         var comentarios = await _repo.ObtenerComentariosAsync(incidencia.IncidenciaId, ct);
+        var adjuntos    = await _adjuntoRepo.ObtenerPorIncidenciaAsync(incidencia.IncidenciaId, ct);
 
-        return IncidenciaMapper.ToDetalle(incidencia, historial, comentarios);
+        return IncidenciaMapper.ToDetalle(incidencia, historial, comentarios, adjuntos);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Application.DTOS.IncidenciaAdjuntos;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -34,6 +35,7 @@ public record IncidenciaDetalleDto(
     bool? CumpleSla,
     string? Sede,
     IEnumerable<HistorialDto> Historial,
-    IEnumerable<ComentarioDto> Comentarios
+    IEnumerable<ComentarioDto> Comentarios,
+    IEnumerable<IncidenciaAdjuntoDto> Adjuntos
 );
 
