@@ -1,4 +1,13 @@
 [
+  "principal/mis-tickets",
+  "principal/mis-asignaciones",
+  "principal/tickets",
+  "conocimiento/articulos",
+  "maintenance/sedes",
+  "maintenance/prioridades",
+  "maintenance/estados",
+  "maintenance/categorias",
+  "security/roles",
   "security/users",
-  "security/roles"
+  "security/permisos"
 ]

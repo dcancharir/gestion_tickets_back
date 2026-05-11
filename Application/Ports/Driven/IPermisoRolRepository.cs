@@ -12,4 +12,6 @@ public interface IPermisoRolRepository
     Task<bool> VerificarSiRolTienePermisoDeVistaAsync(int rolId, string uri, CancellationToken ct = default);
     Task<bool> VerificarSiRolTienePermisoDeControladorAsync(int rolId, string actionName,string controllerName, CancellationToken ct = default);
     Task<PermisoRol?> ObtenerPorPermisoYRol(int PermisoId, int RolId);
+    /// <summary>Elimina todas las asignaciones de permisorol que referencien alguno de los permisoIds dados.</summary>
+    Task<bool> EliminarPorPermisoIdsAsync(List<int> permisoIds, CancellationToken ct = default);
 }

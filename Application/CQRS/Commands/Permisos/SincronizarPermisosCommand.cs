@@ -11,11 +11,15 @@ public record SincronizarPermisosCommand(
 
 public class SincronizarPermisosHandler : ICommandHandler<SincronizarPermisosCommand, bool>
 {
-    private readonly IPermisoRepository _repo;
+    private readonly IPermisoRepository    _repo;
+    private readonly IPermisoRolRepository _permisoRolRepo;
 
-    public SincronizarPermisosHandler(IPermisoRepository repo)
+    public SincronizarPermisosHandler(
+        IPermisoRepository    repo,
+        IPermisoRolRepository permisoRolRepo)
     {
-        _repo = repo;
+        _repo           = repo;
+        _permisoRolRepo = permisoRolRepo;
     }
 
     public async Task<bool> HandleAsync(
@@ -23,7 +27,7 @@ public class SincronizarPermisosHandler : ICommandHandler<SincronizarPermisosCom
     {
         var permisosBd = (await _repo.ObtenerTodosAsync(ct)).ToList();
 
-        // Crear clave única para comparar
+        // Clave única para comparar: nombre|controlador|tipo
         string Key(string nombre, string controlador, string tipo) =>
             $"{nombre}|{controlador}|{tipo}".ToLowerInvariant();
 
@@ -42,13 +46,13 @@ public class SincronizarPermisosHandler : ICommandHandler<SincronizarPermisosCom
                 Key(p.nombre, p.controlador, p.tipo)))
             .Select(p => new Permiso
             {
-                Nombre = p.nombre,
+                Nombre      = p.nombre,
                 Controlador = p.controlador,
-                Tipo = p.tipo
+                Tipo        = p.tipo
             })
             .ToList();
 
-        // ELIMINAR: los que están en BD pero no en input
+        // ELIMINAR: los que están en BD pero ya no aparecen en el input
         var listaEliminar = permisosBd
             .Where(p => !permisosInputKeys.Contains(
                 Key(p.Nombre, p.Controlador, p.Tipo)))
@@ -59,9 +63,14 @@ public class SincronizarPermisosHandler : ICommandHandler<SincronizarPermisosCom
             await _repo.CrearRangoAsync(listaInsertar, ct);
 
         if (listaEliminar.Count != 0)
+        {
+            // 1. Eliminar primero las asignaciones en PermisosRol para evitar error de FK
+            await _permisoRolRepo.EliminarPorPermisoIdsAsync(listaEliminar, ct);
+
+            // 2. Eliminar los permisos obsoletos
             await _repo.EliminarRangoAsync(listaEliminar, ct);
+        }
 
         return true;
     }
-
 }

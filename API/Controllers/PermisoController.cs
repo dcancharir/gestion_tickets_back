@@ -1,3 +1,4 @@
+using API.Extensions;
 using Application.CQRS.Commands.Permisos;
 using Application.CQRS.Commands.Usuarios;
 using Application.CQRS.Core;
@@ -19,6 +20,7 @@ namespace API.Controllers;
 public class PermisoController:ControllerBase
 {
     private readonly IDispatcher _dispatcher;
+    private int GetUsuarioId() => User.GetUsuarioId();
 
     public PermisoController(IDispatcher dispatcher) => _dispatcher = dispatcher;
     
@@ -80,6 +82,21 @@ public class PermisoController:ControllerBase
         return typeof(IActionResult).IsAssignableFrom(method.ReturnType) ||
                (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>));
     }
+    /// <summary>
+    /// Verifica si el usuario autenticado tiene permiso de vista para la URI indicada.
+    /// El frontend envía la ruta actual (ej. "security/users") y recibe { autorizado: true/false }.
+    /// </summary>
+    [HttpGet("verificar-acceso")]
+    [Authorize]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    public async Task<IActionResult> VerificarAcceso([FromQuery] string uri, CancellationToken ct)
+    {
+        var usuarioId = GetUsuarioId();
+        var autorizado = await _dispatcher.QueryAsync(
+            new VerificarAccesoVistaQuery(usuarioId, uri), ct);
+        return Ok(new { autorizado });
+    }
+
     [HttpGet("getall")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<PermisoDto>), StatusCodes.Status200OK)]

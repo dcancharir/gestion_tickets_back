@@ -77,4 +77,13 @@ public class PermisoRolRepository : IPermisoRolRepository
     public async Task<PermisoRol?> ObtenerPorPermisoYRol(int PermisoId, int RolId) {
         return await _db.PermisosRol.FirstOrDefaultAsync(x => x.PermisoId == PermisoId && x.RolId == RolId);
     }
+
+    public async Task<bool> EliminarPorPermisoIdsAsync(List<int> permisoIds, CancellationToken ct = default)
+    {
+        if (permisoIds.Count == 0) return true;
+        var rows = await _db.PermisosRol
+            .Where(x => permisoIds.Contains(x.PermisoId))
+            .ExecuteDeleteAsync(ct);
+        return rows >= 0;
+    }
 }
