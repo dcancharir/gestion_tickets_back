@@ -1,6 +1,7 @@
 ﻿using Application.CQRS.Core;
 using Application.CQRS.Queries.Incidencias;
 using Application.DTOS.Incidencias;
+using Application.DTOS.Notificaciones;
 using Application.Exceptions;
 using Application.Ports.Driven;
 using Domain.Entities;
@@ -26,12 +27,15 @@ public class EscalarIncidenciaHandler
     : ICommandHandler<EscalarIncidenciaCommand, IncidenciaListItemDto> {
     private readonly IIncidenciaRepository _repo;
     private readonly IUsuarioRepository _usuarioRepo;
+    private readonly INotificacionService _notifSvc;
 
     public EscalarIncidenciaHandler(
         IIncidenciaRepository repo,
-        IUsuarioRepository usuarioRepo) {
+        IUsuarioRepository usuarioRepo,
+        INotificacionService notifSvc) {
         _repo = repo;
         _usuarioRepo = usuarioRepo;
+        _notifSvc = notifSvc;
     }
 
     public async Task<IncidenciaListItemDto> HandleAsync(
@@ -71,6 +75,19 @@ public class EscalarIncidenciaHandler
         }, ct);
 
         var actualizada = await _repo.ObtenerPorIdAsync(incidencia.IncidenciaId, ct);
+
+        // Notificación en tiempo real al técnico al que se escala
+        await _notifSvc.NotificarUsuarioAsync(
+            tecnico.UsuarioId,
+            new NotificacionDto(
+                Tipo:           "Escalamiento",
+                TicketPublicId: incidencia.PublicId.ToString(),
+                NumeroTicket:   incidencia.NumeroTicket,
+                Titulo:         incidencia.Titulo,
+                Mensaje:        $"Se te ha escalado el ticket {incidencia.NumeroTicket}: {incidencia.Titulo}. Motivo: {cmd.Motivo}"
+            ),
+            ct);
+
         return IncidenciaMapper.ToListItem(actualizada!);
     }
 }

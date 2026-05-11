@@ -1,6 +1,9 @@
 ﻿using API.Filters;
+using API.Hubs;
 using API.Middlewares;
+using API.Services;
 using Application.CQRS.Core;
+using Application.Ports.Driven;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,8 +44,17 @@ builder.Services
             ClockSkew = TimeSpan.Zero  // sin margen de tolerancia en expiración
         };
 
-        // Devolver 401 como JSON en lugar de redireccionar
+        // Leer token JWT desde query string para conexiones SignalR (WebSocket no soporta headers)
         options.Events = new JwtBearerEvents {
+            OnMessageReceived = context => {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs")) {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            },
             OnChallenge = async context => {
                 context.HandleResponse();
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -60,6 +72,12 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+
+// ── SignalR ───────────────────────────────────────────────────────────────────
+builder.Services.AddSignalR();
+
+// ── Servicio de notificaciones (implementado en API, interfaz en Application) ─
+builder.Services.AddScoped<INotificacionService, NotificacionService>();
 
 // ── CQRS — registra Dispatcher + todos los handlers automáticamente ───────────
 builder.Services.AddControllers();
@@ -92,9 +110,10 @@ builder.Services.AddSwaggerGen(opt => {
 // ── CORS para Angular ─────────────────────────────────────────────────────────
 builder.Services.AddCors(options => {
     options.AddPolicy("Angular", policy =>
-        policy.WithOrigins()
+        policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
-              .AllowAnyMethod().AllowAnyOrigin());
+              .AllowAnyMethod()
+              .AllowCredentials());   // requerido por SignalR WebSocket
 });
 
 var app = builder.Build();
@@ -122,5 +141,6 @@ app.UseAuthorization();
 
 //app.UseMiddleware<RolePermissionMiddleware>();
 app.MapControllers();
+app.MapHub<NotificacionHub>("/hubs/notificaciones");
 
 app.Run();

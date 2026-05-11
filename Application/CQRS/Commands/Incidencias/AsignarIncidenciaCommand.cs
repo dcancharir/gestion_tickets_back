@@ -1,6 +1,7 @@
 ﻿using Application.CQRS.Core;
 using Application.CQRS.Queries.Incidencias;
 using Application.DTOS.Incidencias;
+using Application.DTOS.Notificaciones;
 using Application.Exceptions;
 using Application.Ports.Driven;
 using Domain.Entities;
@@ -27,12 +28,15 @@ public class AsignarIncidenciaHandler
     : ICommandHandler<AsignarIncidenciaCommand, IncidenciaListItemDto> {
     private readonly IIncidenciaRepository _repo;
     private readonly IUsuarioRepository _usuarioRepo;
+    private readonly INotificacionService _notifSvc;
 
     public AsignarIncidenciaHandler(
         IIncidenciaRepository repo,
-        IUsuarioRepository usuarioRepo) {
+        IUsuarioRepository usuarioRepo,
+        INotificacionService notifSvc) {
         _repo = repo;
         _usuarioRepo = usuarioRepo;
+        _notifSvc = notifSvc;
     }
 
     public async Task<IncidenciaListItemDto> HandleAsync(
@@ -80,6 +84,19 @@ public class AsignarIncidenciaHandler
         }, ct);
 
         var actualizada = await _repo.ObtenerPorIdAsync(incidencia.IncidenciaId, ct);
+
+        // Notificación en tiempo real al técnico asignado
+        await _notifSvc.NotificarUsuarioAsync(
+            tecnico.UsuarioId,
+            new NotificacionDto(
+                Tipo:           "Asignación",
+                TicketPublicId: incidencia.PublicId.ToString(),
+                NumeroTicket:   incidencia.NumeroTicket,
+                Titulo:         incidencia.Titulo,
+                Mensaje:        $"Se te ha asignado el ticket {incidencia.NumeroTicket}: {incidencia.Titulo}"
+            ),
+            ct);
+
         return IncidenciaMapper.ToListItem(actualizada!);
     }
 }

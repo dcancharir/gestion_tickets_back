@@ -1,4 +1,5 @@
-﻿using Application.CQRS.Commands.BaseConocimientos;
+﻿using API.Extensions;
+using Application.CQRS.Commands.BaseConocimientos;
 using Application.CQRS.Core;
 using Application.CQRS.Queries.BaseConocimientos;
 using Application.DTOS.BaseConocimiento;
@@ -13,8 +14,7 @@ public class BaseConocimientoController : ControllerBase {
     private readonly IDispatcher _dispatcher;
     public BaseConocimientoController(IDispatcher dispatcher) => _dispatcher = dispatcher;
 
-    private int GetUsuarioId() =>
-        int.Parse(Request.Headers["X-Usuario-Id"].FirstOrDefault() ?? "0");
+    private int GetUsuarioId() => User.GetUsuarioId();
 
     // GET api/base-conocimiento
     [HttpGet]
