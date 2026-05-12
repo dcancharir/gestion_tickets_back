@@ -1,9 +1,9 @@
 ﻿using Application.CQRS.Core;
 using Application.CQRS.Queries.Incidencias;
 using Application.DTOS.Incidencias;
-using Application.DTOS.Notificaciones;
 using Application.Exceptions;
 using Application.Ports.Driven;
+using Application.Utilities;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -29,14 +29,20 @@ public class AsignarIncidenciaHandler
     private readonly IIncidenciaRepository _repo;
     private readonly IUsuarioRepository _usuarioRepo;
     private readonly INotificacionService _notifSvc;
+    private readonly IEmailService _emailSvc;
+    private readonly IAppSettings _appSettings;
 
     public AsignarIncidenciaHandler(
         IIncidenciaRepository repo,
         IUsuarioRepository usuarioRepo,
-        INotificacionService notifSvc) {
+        INotificacionService notifSvc,
+        IEmailService emailSvc,
+        IAppSettings appSettings) {
         _repo = repo;
         _usuarioRepo = usuarioRepo;
         _notifSvc = notifSvc;
+        _emailSvc = emailSvc;
+        _appSettings = appSettings;
     }
 
     public async Task<IncidenciaListItemDto> HandleAsync(
@@ -85,17 +91,30 @@ public class AsignarIncidenciaHandler
 
         var actualizada = await _repo.ObtenerPorIdAsync(incidencia.IncidenciaId, ct);
 
-        // Notificación en tiempo real al técnico asignado
-        await _notifSvc.NotificarUsuarioAsync(
+        // Notificación persistida en BD + en tiempo real al técnico asignado
+        await _notifSvc.GuardarYNotificarAsync(
             tecnico.UsuarioId,
-            new NotificacionDto(
-                Tipo:           "Asignación",
-                TicketPublicId: incidencia.PublicId.ToString(),
-                NumeroTicket:   incidencia.NumeroTicket,
-                Titulo:         incidencia.Titulo,
-                Mensaje:        $"Se te ha asignado el ticket {incidencia.NumeroTicket}: {incidencia.Titulo}"
-            ),
+            "Asignación",
+            incidencia.PublicId.ToString(),
+            incidencia.NumeroTicket,
+            incidencia.Titulo,
+            $"Se te ha asignado el ticket {incidencia.NumeroTicket}: {incidencia.Titulo}",
             ct);
+
+        // Email al técnico asignado
+        var urlTicket = $"{_appSettings.FrontendUrl}/tickets/{incidencia.PublicId}";
+        var template  = EmailTemplateStrings.TicketAsignadoTemplate(
+            $"{tecnico.Nombre} {tecnico.Apellidos}",
+            incidencia.NumeroTicket,
+            incidencia.Titulo,
+            actualizada!.Categoria.Nombre,
+            actualizada.NivelPrioridad.Nombre,
+            urlTicket);
+        _ = _emailSvc.SendEmail(
+            tecnico.Email,
+            $"[{incidencia.NumeroTicket}] Ticket asignado: {incidencia.Titulo}",
+            template,
+            true);
 
         return IncidenciaMapper.ToListItem(actualizada!);
     }

@@ -35,11 +35,22 @@ public class RegistrarIncidenciaHandler
     private readonly IFileStorageService _fileStorageService;
     private readonly IIncidenciaAdjuntoRepository _adjuntoRepository;
     private readonly IEmailService _emailService;
-    public RegistrarIncidenciaHandler(IIncidenciaRepository repo, IFileStorageService fileStorageService, IIncidenciaAdjuntoRepository adjuntoRepository, IEmailService emailService) {
+    private readonly IAcuerdoNivelServicioRepository _slaRepo;
+    private readonly IAppSettings _appSettings;
+
+    public RegistrarIncidenciaHandler(
+        IIncidenciaRepository repo,
+        IFileStorageService fileStorageService,
+        IIncidenciaAdjuntoRepository adjuntoRepository,
+        IEmailService emailService,
+        IAcuerdoNivelServicioRepository slaRepo,
+        IAppSettings appSettings) {
         _repo = repo;
         _fileStorageService = fileStorageService;
         _adjuntoRepository = adjuntoRepository;
         _emailService = emailService;
+        _slaRepo = slaRepo;
+        _appSettings = appSettings;
     }
 
     public async Task<IncidenciaListItemDto> HandleAsync(
@@ -49,8 +60,15 @@ public class RegistrarIncidenciaHandler
         var numeroTicket = $"TKT-{DateTime.Now.Year}-{(conteo + 1):D5}";
         var ahora = DateTime.Now;
 
-        // Calcular fechas límite SLA según prioridad
-        // (los minutos vienen de NivelPrioridad, ya definidos en el seed)
+        // Calcular fechas límite SLA según categoría + prioridad
+        var sla = await _slaRepo.ObtenerPorCategoriaYPrioridadAsync(cmd.CategoriaId, cmd.PrioridadId, ct);
+        DateTime? fechaLimiteRespuesta = sla is not null
+            ? ahora.AddMinutes(sla.TiempoRespuestaMin)
+            : null;
+        DateTime? fechaLimiteResolucion = sla is not null
+            ? ahora.AddMinutes(sla.TiempoResolucionMin)
+            : null;
+
         var incidencia = new Incidencia {
             NumeroTicket = numeroTicket,
             Titulo = cmd.Titulo,
@@ -65,6 +83,8 @@ public class RegistrarIncidenciaHandler
             FechaRegistro = ahora,
             FechaUltimaActualizacion = ahora,
             SedeId = cmd.SedeId,
+            FechaLimiteRespuesta = fechaLimiteRespuesta,
+            FechaLimiteResolucion = fechaLimiteResolucion,
         };
 
         var creada = await _repo.CrearAsync(incidencia, ct);
@@ -94,8 +114,13 @@ public class RegistrarIncidenciaHandler
 
         var completa = await _repo.ObtenerPorIdAsync(creada.IncidenciaId, ct);
         var mapped = IncidenciaMapper.ToListItem(completa!);
-        var template = EmailTemplateStrings.NewIncidenciaTemplate(mapped, $"http://localhost:4200/principal/ticket-detail/{mapped.PublicId}");
-        _ = _emailService.SendEmail("diego.canchari@designdevsoftware.com","Sistema de Gestión de Incidencias - Nueva Incidencia",template,true);
+        var urlTicket = $"{_appSettings.FrontendUrl}/tickets/{mapped.PublicId}";
+        var template = EmailTemplateStrings.NewIncidenciaTemplate(mapped, urlTicket);
+        _ = _emailService.SendEmail(
+            completa!.Solicitante.Email,
+            $"[{mapped.NumeroTicket}] Ticket registrado: {mapped.Titulo}",
+            template,
+            true);
         return mapped;
     }
 }

@@ -80,8 +80,34 @@ public class IncidenciaRepository : IIncidenciaRepository {
             .ToListAsync(ct);
 
     public async Task<int> ContarPorEstadoAsync(int estadoId, CancellationToken ct = default) {
+        return (estadoId == 0) ? await _db.Incidencias.CountAsync(ct) : await _db.Incidencias.CountAsync(i => i.EstadoId == estadoId, ct);
+    }
 
-        return (estadoId == 0) ? await _db.Incidencias.CountAsync(ct)  : await _db.Incidencias.CountAsync(i => i.EstadoId == estadoId, ct) ;
+    /// <summary>
+    /// Devuelve tickets cuyo SLA de resolución ya venció, que no han sido
+    /// escalados todavía (FechaEscalamiento == null) y que no están en estado final.
+    /// EstadoId 6 = Resuelto, 7 = Cerrado.
+    /// </summary>
+    public async Task<IEnumerable<Incidencia>> ObtenerVencidasSinEscalarAsync(CancellationToken ct = default) =>
+        await _db.Incidencias
+            .AsNoTracking()
+            .Include(i => i.TecnicoAsignado)
+            .Include(i => i.EstadoIncidencia)
+            .Where(i =>
+                i.FechaLimiteResolucion != null &&
+                i.FechaLimiteResolucion < DateTime.Now &&
+                i.FechaEscalamiento == null &&
+                i.EstadoId != 6 &&
+                i.EstadoId != 7)
+            .ToListAsync(ct);
+
+    public async Task EscalarAsync(int incidenciaId, DateTime fechaEscalamiento, CancellationToken ct = default) {
+        await _db.Incidencias
+            .Where(i => i.IncidenciaId == incidenciaId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(i => i.FechaEscalamiento, fechaEscalamiento)
+                .SetProperty(i => i.FechaUltimaActualizacion, fechaEscalamiento),
+                ct);
     }
 
     // ── Persistencia ──────────────────────────────────────────────────────────
@@ -94,22 +120,22 @@ public class IncidenciaRepository : IIncidenciaRepository {
 
     public async Task<Incidencia> ActualizarAsync(Incidencia incidencia, CancellationToken ct = default) {
         await _db.Incidencias
-       .Where(i => i.IncidenciaId == incidencia.IncidenciaId)
-       .ExecuteUpdateAsync(s => s
-           .SetProperty(i => i.TecnicoAsignadoId, incidencia.TecnicoAsignadoId)
-           .SetProperty(i => i.FechaAsignacion, incidencia.FechaAsignacion)
-           .SetProperty(i => i.EstadoId, incidencia.EstadoId)
-           .SetProperty(i => i.FechaUltimaActualizacion, incidencia.FechaUltimaActualizacion)
-           .SetProperty(i => i.NumeroReasignaciones, incidencia.NumeroReasignaciones)
-           .SetProperty(i=>i.SolucionAplicada,incidencia.SolucionAplicada)
-            .SetProperty(i => i.ResueltoEnPrimerContacto, incidencia.ResueltoEnPrimerContacto)
-           ,
-           ct);
+            .Where(i => i.IncidenciaId == incidencia.IncidenciaId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(i => i.TecnicoAsignadoId,          incidencia.TecnicoAsignadoId)
+                .SetProperty(i => i.FechaAsignacion,             incidencia.FechaAsignacion)
+                .SetProperty(i => i.EstadoId,                    incidencia.EstadoId)
+                .SetProperty(i => i.FechaUltimaActualizacion,    incidencia.FechaUltimaActualizacion)
+                .SetProperty(i => i.NumeroReasignaciones,        incidencia.NumeroReasignaciones)
+                .SetProperty(i => i.SolucionAplicada,            incidencia.SolucionAplicada)
+                .SetProperty(i => i.ResueltoEnPrimerContacto,    incidencia.ResueltoEnPrimerContacto)
+                .SetProperty(i => i.FechaResolucion,             incidencia.FechaResolucion)
+                .SetProperty(i => i.FechaPrimeraRespuesta,       incidencia.FechaPrimeraRespuesta)
+                .SetProperty(i => i.FechaCierre,                 incidencia.FechaCierre)
+                .SetProperty(i => i.CerradoPorId,                incidencia.CerradoPorId),
+            ct);
 
         return incidencia;
-        //_db.Incidencias.Update(incidencia);
-        //await _db.SaveChangesAsync(ct);
-        //return incidencia;
     }
 
     // ── Historial ─────────────────────────────────────────────────────────────

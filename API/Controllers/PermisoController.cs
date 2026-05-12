@@ -117,6 +117,40 @@ public class PermisoController:ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// Devuelve la lista de URIs de vistas a las que tiene acceso el usuario autenticado.
+    /// Usado por el sidebar para filtrar el menú según el rol.
+    /// </summary>
+    [HttpGet("mis-vistas")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMisVistas(CancellationToken ct) {
+        if(User.Identity?.IsAuthenticated != true)
+            return Ok(Array.Empty<string>());
+
+        // Obtener todos los permisos de tipo "vista"
+        var todosPermisos = await _dispatcher.QueryAsync(new ObtenerPermisosQuery(), ct);
+        var todasLasVistas = todosPermisos.Where(p => p.Tipo == "vista");
+
+        // Si el usuario tiene acceso total, devolver todas las vistas sin filtrar
+        var hasFullAccessClaim = User.FindFirst("HasFullAccess")?.Value;
+        if (bool.TryParse(hasFullAccessClaim, out var hasFullAccess) && hasFullAccess)
+            return Ok(todasLasVistas.Select(p => p.Nombre));
+
+        var rolIdClaim = User.FindFirst("RolId")?.Value;
+        if(rolIdClaim is null || !int.TryParse(rolIdClaim, out var rolId))
+            return Ok(Array.Empty<string>());
+
+        var permisoRols = await _dispatcher.QueryAsync(
+            new ObtenerPermisosRolPorRolIdQuery(rolId), ct);
+
+        var uris = todasLasVistas
+            .Where(p => permisoRols.Any(pr => pr.PermisoId == p.PermisoId))
+            .Select(p => p.Nombre);
+
+        return Ok(uris);
+    }
+
     // POST api/permiso
     [HttpPost]
     [ProducesResponseType(typeof(PermisoRolDto), StatusCodes.Status201Created)]

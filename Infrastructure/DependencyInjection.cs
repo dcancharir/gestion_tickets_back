@@ -38,6 +38,7 @@ public static class DependencyInjection {
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IPasswordGenerator, PasswordGenerator>();
         services.AddScoped<IFileStorageService, FileStorageService>();
+        services.AddSingleton<IAppSettings, AppSettings>();
         return services;
     }
 }

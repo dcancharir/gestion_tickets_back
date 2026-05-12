@@ -1,4 +1,5 @@
 [
+  "dashboard",
   "principal/mis-tickets",
   "principal/mis-asignaciones",
   "principal/tickets",
@@ -9,5 +10,6 @@
   "maintenance/categorias",
   "security/roles",
   "security/users",
-  "security/permisos"
+  "security/permisos",
+  "maintenance/slas"
 ]

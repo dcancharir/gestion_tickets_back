@@ -37,17 +37,63 @@ public class BaseConocimientoRepository : IBaseConocimientoRepository {
             .FirstOrDefaultAsync(b => b.PublicId == publicId, ct);
 
     public async Task<IEnumerable<BaseConocimiento>> BuscarAsync(
-        string termino, CancellationToken ct = default) =>
-        await _db.BaseConocimiento
+        string termino, CancellationToken ct = default) {
+
+        // ── 1. Normalizar: dividir en palabras significativas (≥ 3 caracteres) ──
+        //    "en sala el quiosco" → ["sala", "quiosco"]  (ignora "en", "el")
+        var palabras = termino
+            .Trim()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(p => p.Length >= 3)
+            .Distinct()
+            .ToArray();
+
+        if(palabras.Length == 0)
+            return Enumerable.Empty<BaseConocimiento>();
+
+        var queryBase = _db.BaseConocimiento
             .AsNoTracking()
             .Include(b => b.Categoria)
             .Include(b => b.CreadoPor)
-            .Where(b => b.Activo &&
-                       (b.Titulo.Contains(termino) ||
-                        b.Problema.Contains(termino) ||
-                        b.Solucion.Contains(termino)))
-            .OrderByDescending(b => b.FechaCreacion)
-            .ToListAsync(ct);
+            .Where(b => b.Activo);
+
+        // ── 2. Intento AND: todas las palabras deben aparecer en algún campo ──
+        //    Cada .Where() encadenado agrega un AND en SQL
+        var queryAnd = queryBase;
+        foreach(var palabra in palabras) {
+            var p = palabra; // captura para el closure de EF
+            queryAnd = queryAnd.Where(b =>
+                b.Titulo.Contains(p) ||
+                b.Problema.Contains(p) ||
+                b.Solucion.Contains(p));
+        }
+
+        var resultados = await queryAnd.ToListAsync(ct);
+
+        // ── 3. Fallback OR: si AND no dio resultados, basta con que aparezca
+        //    al menos UNA palabra (se filtra en memoria, la KB es pequeña)  ──
+        if(!resultados.Any()) {
+            var todos = await queryBase.ToListAsync(ct);
+            resultados = todos
+                .Where(b => palabras.Any(p =>
+                    b.Titulo.Contains(p, StringComparison.OrdinalIgnoreCase)   ||
+                    b.Problema.Contains(p, StringComparison.OrdinalIgnoreCase) ||
+                    b.Solucion.Contains(p, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+        }
+
+        // ── 4. Ordenar por relevancia ──────────────────────────────────────────
+        //    Criterio 1: cuántas palabras aparecen en el título (más = primero)
+        //    Criterio 2: cuántas aparecen en problema o solución
+        //    Criterio 3: más reciente
+        return resultados
+            .OrderByDescending(b => palabras.Count(p =>
+                b.Titulo.Contains(p, StringComparison.OrdinalIgnoreCase)))
+            .ThenByDescending(b => palabras.Count(p =>
+                b.Problema.Contains(p, StringComparison.OrdinalIgnoreCase) ||
+                b.Solucion.Contains(p, StringComparison.OrdinalIgnoreCase)))
+            .ThenByDescending(b => b.FechaCreacion);
+    }
 
     public async Task<IEnumerable<BaseConocimiento>> ObtenerPorCategoriaAsync(
         int categoriaId, CancellationToken ct = default) =>

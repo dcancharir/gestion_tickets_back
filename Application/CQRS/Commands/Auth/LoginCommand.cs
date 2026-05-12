@@ -50,7 +50,8 @@ public class LoginHandler : ICommandHandler<LoginCommand, TokenResponseDto> {
             usuario.Apellidos,
             usuario.Email,
             usuario.Rol.Nombre,
-            usuario.UserName
+            usuario.UserName,
+            usuario.HasFullAccess
         );
     }
 }

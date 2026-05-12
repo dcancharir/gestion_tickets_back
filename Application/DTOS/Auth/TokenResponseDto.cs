@@ -12,5 +12,6 @@ public record TokenResponseDto(
     string Apellidos,
     string Email,
     string Rol,
-    string UserName
+    string UserName,
+    bool HasFullAccess
 );

@@ -4,6 +4,7 @@ using Application.DTOS.Dashboard;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers;
 
@@ -15,12 +16,26 @@ public class DashboardController : ControllerBase {
     public DashboardController(IDispatcher dispatcher) => _dispatcher = dispatcher;
 
     // GET api/dashboard/kpis
-    // Admin y Técnico pueden ver el dashboard completo
+    // Vista global para Administradores
     [HttpGet("kpis")]
-    //[Authorize(Roles = "Administrador,Técnico")]
     [ProducesResponseType(typeof(DashboardKpiDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetKpis(CancellationToken ct) {
         var result = await _dispatcher.QueryAsync(new ObtenerDashboardKpiQuery(), ct);
+        return Ok(result);
+    }
+
+    // GET api/dashboard/kpis-tecnico
+    // Vista personal para el Técnico autenticado (lee su ID del JWT)
+    [HttpGet("kpis-tecnico")]
+    [ProducesResponseType(typeof(DashboardKpiTecnicoDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetKpisTecnico(CancellationToken ct) {
+        var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if(idClaim is null || !int.TryParse(idClaim, out var tecnicoId))
+            return Unauthorized();
+
+        var result = await _dispatcher.QueryAsync(
+            new ObtenerDashboardKpiTecnicoQuery(tecnicoId), ct);
         return Ok(result);
     }
 }

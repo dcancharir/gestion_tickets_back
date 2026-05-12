@@ -13,10 +13,12 @@ public interface IIncidenciaRepository {
     Task<IEnumerable<Incidencia>> ObtenerPorSolicitanteAsync(int solicitanteId, CancellationToken ct = default);
     Task<IEnumerable<Incidencia>> ObtenerPorTecnicoAsync(int tecnicoId, CancellationToken ct = default);
     Task<int> ContarPorEstadoAsync(int estadoId, CancellationToken ct = default);
+    Task<IEnumerable<Incidencia>> ObtenerVencidasSinEscalarAsync(CancellationToken ct = default);
 
     // ── Persistencia ──────────────────────────────────────────────────────────
     Task<Incidencia> CrearAsync(Incidencia incidencia, CancellationToken ct = default);
     Task<Incidencia> ActualizarAsync(Incidencia incidencia, CancellationToken ct = default);
+    Task EscalarAsync(int incidenciaId, DateTime fechaEscalamiento, CancellationToken ct = default);
 
     // ── Historial ─────────────────────────────────────────────────────────────
     Task AgregarHistorialAsync(HistorialIncidencia historial, CancellationToken ct = default);

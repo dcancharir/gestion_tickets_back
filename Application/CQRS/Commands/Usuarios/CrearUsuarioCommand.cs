@@ -26,10 +26,13 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
     private readonly IUsuarioRepository _repo;
     private readonly IEmailService _emailService;
     private readonly IPasswordGenerator _passwordService;
-    public CrearUsuarioHandler(IUsuarioRepository repo, IEmailService emailService, IPasswordGenerator passwordService) {
-        _repo = repo;
-        _emailService = emailService;
+    private readonly IAppSettings _appSettings;
+
+    public CrearUsuarioHandler(IUsuarioRepository repo, IEmailService emailService, IPasswordGenerator passwordService, IAppSettings appSettings) {
+        _repo            = repo;
+        _emailService    = emailService;
         _passwordService = passwordService;
+        _appSettings     = appSettings;
     }
 
     public async Task<UsuarioDto> HandleAsync(
@@ -72,8 +75,8 @@ public class CrearUsuarioHandler : ICommandHandler<CrearUsuarioCommand, UsuarioD
             conRol.FechaCreacion,
             conRol.UserName
         );
-        var template = EmailTemplateStrings.NewUserTemplate(usuarioDto,password, $"http://localhost:4200");
-        _ = _emailService.SendEmail(command.Email, "Sistema Gestion de Tickets", $"Se ha creado una cuenta con los siguientes datos \n Usuario : {command.UserName} \n Password : {password}");
+        var template = EmailTemplateStrings.NewUserTemplate(usuarioDto, password, _appSettings.FrontendUrl);
+        _ = _emailService.SendEmail(command.Email, "Sistema Gestion de Tickets", template,true);
 
         return usuarioDto;
     }

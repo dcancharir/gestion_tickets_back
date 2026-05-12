@@ -43,6 +43,17 @@ public class AgregarComentarioHandler
 
         var ahora = DateTime.Now;
 
+        // ── Primera respuesta automática ──────────────────────────────────────
+        // Si quien comenta NO es el solicitante y aún no hay fecha de primera respuesta,
+        // se registra ahora como la primera respuesta oficial del equipo de soporte.
+        if (incidencia.FechaPrimeraRespuesta is null &&
+            cmd.UsuarioId != incidencia.SolicitanteId)
+        {
+            incidencia.FechaPrimeraRespuesta = ahora;
+            incidencia.FechaUltimaActualizacion = ahora;
+            await _repo.ActualizarAsync(incidencia, ct);
+        }
+
         var comentario = new ComentarioIncidencia {
             IncidenciaId = incidencia.IncidenciaId,
             UsuarioId = cmd.UsuarioId,

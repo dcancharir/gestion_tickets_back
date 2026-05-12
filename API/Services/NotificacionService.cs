@@ -1,25 +1,58 @@
 using API.Hubs;
 using Application.DTOS.Notificaciones;
 using Application.Ports.Driven;
+using Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
 
 namespace API.Services;
 
 /// <summary>
-/// Implementación del servicio de notificaciones en tiempo real via SignalR.
-/// Vive en la capa API porque depende directamente de NotificacionHub.
+/// Implementación del servicio de notificaciones.
+/// Persiste cada notificación en BD y luego la envía en tiempo real via SignalR.
+/// Vive en la capa API porque depende de NotificacionHub (SignalR).
 /// </summary>
 public class NotificacionService : INotificacionService {
     private readonly IHubContext<NotificacionHub> _hub;
+    private readonly INotificacionRepository _notifRepo;
 
-    public NotificacionService(IHubContext<NotificacionHub> hub) {
-        _hub = hub;
+    public NotificacionService(
+        IHubContext<NotificacionHub> hub,
+        INotificacionRepository notifRepo) {
+        _hub       = hub;
+        _notifRepo = notifRepo;
     }
 
-    public async Task NotificarUsuarioAsync(int usuarioId, NotificacionDto dto, CancellationToken ct = default) {
-        // IUserIdProvider usa ClaimTypes.NameIdentifier → usuario.UsuarioId.ToString()
+    public async Task GuardarYNotificarAsync(
+        int    usuarioId,
+        string tipo,
+        string ticketPublicId,
+        string numeroTicket,
+        string titulo,
+        string mensaje,
+        CancellationToken ct = default) {
+
+        // 1. Guardar en BD para que el usuario la vea al (re)iniciar sesión
+        var notificacion = await _notifRepo.CrearAsync(new Notificacion {
+            UsuarioId     = usuarioId,
+            Tipo          = tipo,
+            TicketPublicId = ticketPublicId,
+            NumeroTicket  = numeroTicket,
+            Titulo        = titulo,
+            Mensaje       = mensaje,
+            FechaCreacion = DateTime.Now
+        }, ct);
+
+        // 2. Enviar en tiempo real por SignalR con el ID ya asignado por la BD
         await _hub.Clients
             .User(usuarioId.ToString())
-            .SendAsync("RecibirNotificacion", dto, ct);
+            .SendAsync("RecibirNotificacion", new NotificacionDto(
+                notificacion.NotificacionId,
+                tipo,
+                ticketPublicId,
+                numeroTicket,
+                titulo,
+                mensaje,
+                notificacion.FechaCreacion
+            ), ct);
     }
 }

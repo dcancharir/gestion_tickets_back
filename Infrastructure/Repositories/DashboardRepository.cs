@@ -189,4 +189,93 @@ public class DashboardRepository : IDashboardRepository {
             TopTecnicos: topTecnicos
         );
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // KPIs PERSONALES DEL TÉCNICO
+    // Solo incluye tickets asignados a ese técnico.
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<DashboardKpiTecnicoDto> ObtenerKpisTecnicoAsync(
+        int tecnicoId, CancellationToken ct = default) {
+
+        var mis = await _db.Incidencias
+            .AsNoTracking()
+            .Include(i => i.EstadoIncidencia)
+            .Include(i => i.NivelPrioridad)
+            .Where(i => i.TecnicoAsignadoId == tecnicoId)
+            .ToListAsync(ct);
+
+        var hoy = DateTime.Today;
+
+        // ── Contadores ────────────────────────────────────────────────────────
+        var resumen = new ResumenTecnicoDto(
+            TotalAsignados: mis.Count,
+            EnProgreso:     mis.Count(i => i.EstadoId is 2 or 3 or 4),   // Asignado/Diagnóstico/En Progreso
+            Pendientes:     mis.Count(i => i.EstadoId == 5),
+            ResueltosHoy:   mis.Count(i => i.FechaResolucion.HasValue &&
+                                           i.FechaResolucion.Value.Date == hoy),
+            Criticos:       mis.Count(i => i.NivelPrioridad.Nivel == 1 &&  // Nivel 1 = Crítico
+                                           i.EstadoId != 6 && i.EstadoId != 7)
+        );
+
+        // ── KPIs personales ───────────────────────────────────────────────────
+        var resueltos = mis.Where(i => i.FechaResolucion.HasValue).ToList();
+
+        double? miMttr = resueltos.Any()
+            ? Math.Round(resueltos.Average(i =>
+                (i.FechaResolucion!.Value - i.FechaRegistro).TotalMinutes), 2)
+            : null;
+
+        var conSla = resueltos.Where(i => i.FechaLimiteResolucion.HasValue).ToList();
+        double? miSla = conSla.Any()
+            ? Math.Round(100.0 * conSla.Count(i =>
+                i.FechaResolucion <= i.FechaLimiteResolucion) / conSla.Count, 2)
+            : null;
+
+        double? miPrimerContacto = resueltos.Any()
+            ? Math.Round(100.0 * resueltos.Count(i => i.ResueltoEnPrimerContacto)
+                / resueltos.Count, 2)
+            : null;
+
+        // ── Próximos a vencer SLA (dentro de las próximas 4 horas, no finales) ─
+        var limite = DateTime.Now.AddHours(4);
+        var proximosVencer = mis
+            .Where(i => i.FechaLimiteResolucion.HasValue &&
+                        i.FechaLimiteResolucion.Value <= limite &&
+                        i.FechaLimiteResolucion.Value >= DateTime.Now &&
+                        i.EstadoId != 6 && i.EstadoId != 7)
+            .OrderBy(i => i.FechaLimiteResolucion)
+            .Select(i => new TicketResumenDto(
+                PublicId:            i.PublicId.ToString(),
+                NumeroTicket:        i.NumeroTicket,
+                Titulo:              i.Titulo,
+                Estado:              i.EstadoIncidencia.Nombre,
+                Prioridad:           i.NivelPrioridad.Nombre,
+                FechaRegistro:       i.FechaRegistro,
+                FechaLimiteResolucion: i.FechaLimiteResolucion))
+            .ToList();
+
+        // ── Críticos abiertos asignados a este técnico ────────────────────────
+        var criticosAbiertos = mis
+            .Where(i => i.NivelPrioridad.Nivel == 1 &&
+                        i.EstadoId != 6 && i.EstadoId != 7)
+            .OrderBy(i => i.FechaRegistro)
+            .Select(i => new TicketResumenDto(
+                PublicId:            i.PublicId.ToString(),
+                NumeroTicket:        i.NumeroTicket,
+                Titulo:              i.Titulo,
+                Estado:              i.EstadoIncidencia.Nombre,
+                Prioridad:           i.NivelPrioridad.Nombre,
+                FechaRegistro:       i.FechaRegistro,
+                FechaLimiteResolucion: i.FechaLimiteResolucion))
+            .ToList();
+
+        return new DashboardKpiTecnicoDto(
+            MisTickets:          resumen,
+            MiMttrMinutos:       miMttr,
+            MiSla:               miSla,
+            MiPrimerContacto:    miPrimerContacto,
+            ProximosAVencerSla:  proximosVencer,
+            CriticosAbiertos:    criticosAbiertos
+        );
+    }
 }

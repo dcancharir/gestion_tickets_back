@@ -76,8 +76,14 @@ builder.Services.AddAuthorization();
 // ── SignalR ───────────────────────────────────────────────────────────────────
 builder.Services.AddSignalR();
 
+// ── Repositorio de notificaciones ────────────────────────────────────────────
+builder.Services.AddScoped<INotificacionRepository, Infrastructure.Repositories.NotificacionRepository>();
+
 // ── Servicio de notificaciones (implementado en API, interfaz en Application) ─
 builder.Services.AddScoped<INotificacionService, NotificacionService>();
+
+// ── Monitor de SLA: escalamiento automático cada 15 minutos ──────────────────
+builder.Services.AddHostedService<Infrastructure.Services.SlaMonitorService>();
 
 // ── CQRS — registra Dispatcher + todos los handlers automáticamente ───────────
 builder.Services.AddControllers();

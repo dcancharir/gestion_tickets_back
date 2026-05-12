@@ -3,6 +3,7 @@ using Application.CQRS.Queries.Incidencias;
 using Application.DTOS.Incidencias;
 using Application.Exceptions;
 using Application.Ports.Driven;
+using Application.Utilities;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -25,8 +26,14 @@ public record ResolverIncidenciaCommand(
 public class ResolverIncidenciaHandler
     : ICommandHandler<ResolverIncidenciaCommand, IncidenciaListItemDto> {
     private readonly IIncidenciaRepository _repo;
+    private readonly IEmailService _emailSvc;
+    private readonly IAppSettings _appSettings;
 
-    public ResolverIncidenciaHandler(IIncidenciaRepository repo) => _repo = repo;
+    public ResolverIncidenciaHandler(IIncidenciaRepository repo, IEmailService emailSvc, IAppSettings appSettings) {
+        _repo        = repo;
+        _emailSvc    = emailSvc;
+        _appSettings = appSettings;
+    }
 
     public async Task<IncidenciaListItemDto> HandleAsync(
         ResolverIncidenciaCommand cmd, CancellationToken ct = default) {
@@ -57,6 +64,21 @@ public class ResolverIncidenciaHandler
         }, ct);
 
         var actualizada = await _repo.ObtenerPorIdAsync(incidencia.IncidenciaId, ct);
+
+        // Email al solicitante notificando que su ticket fue resuelto
+        var urlTicket = $"{_appSettings.FrontendUrl}/tickets/{incidencia.PublicId}";
+        var template  = EmailTemplateStrings.TicketResueltoTemplate(
+            $"{actualizada!.Solicitante.Nombre} {actualizada.Solicitante.Apellidos}",
+            actualizada.NumeroTicket,
+            actualizada.Titulo,
+            cmd.SolucionAplicada,
+            urlTicket);
+        _ = _emailSvc.SendEmail(
+            actualizada.Solicitante.Email,
+            $"[{actualizada.NumeroTicket}] Tu ticket ha sido resuelto",
+            template,
+            true);
+
         return IncidenciaMapper.ToListItem(actualizada!);
     }
 }
