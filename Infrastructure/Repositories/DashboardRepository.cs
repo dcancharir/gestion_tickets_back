@@ -109,12 +109,23 @@ public class DashboardRepository : IDashboardRepository {
             ? Math.Round(100.0 * reabiertas / cerradas.Count, 2)
             : null;
 
+        // ── KPI: Resueltos últimos 7 días vs 7 días anteriores ────────────────
+        var ahora    = DateTime.UtcNow;
+        var hace7d   = ahora.AddDays(-7);
+        var hace14d  = ahora.AddDays(-14);
+
+        int resueltos7d        = resueltas.Count(i => i.FechaResolucion >= hace7d);
+        int resueltosAnterior7d = resueltas.Count(i =>
+            i.FechaResolucion >= hace14d && i.FechaResolucion < hace7d);
+
         var kpisItil = new KpisItilDto(
             MttrPromedioMinutos: mttr,
             MttrRespuestaPromedioMinutos: mttrRespuesta,
             PorcentajeCumplimientoSla: pctSla,
             PorcentajeResolucionPrimerContacto: pctPrimerContacto,
-            PorcentajeReincidencia: pctReincidencia
+            PorcentajeReincidencia: pctReincidencia,
+            Resueltos7d: resueltos7d,
+            ResueltosAnterior7d: resueltosAnterior7d
         );
 
         // ── Distribución por categoría ────────────────────────────────────────
@@ -277,5 +288,38 @@ public class DashboardRepository : IDashboardRepository {
             ProximosAVencerSla:  proximosVencer,
             CriticosAbiertos:    criticosAbiertos
         );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // TENDENCIA 7 DÍAS
+    // Devuelve los últimos 7 días con conteo de registrados y resueltos por día.
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<IEnumerable<TendenciaDiaDto>> ObtenerTendencia7dAsync(
+        CancellationToken ct = default) {
+
+        var hoy    = DateTime.UtcNow.Date;
+        var inicio = hoy.AddDays(-6); // 7 días incluyendo hoy
+
+        var incidencias = await _db.Incidencias
+            .AsNoTracking()
+            .Where(i => i.FechaRegistro.Date >= inicio ||
+                        (i.FechaResolucion.HasValue && i.FechaResolucion.Value.Date >= inicio))
+            .Select(i => new {
+                FechaRegistro   = i.FechaRegistro.Date,
+                FechaResolucion = i.FechaResolucion.HasValue ? (DateTime?)i.FechaResolucion.Value.Date : null
+            })
+            .ToListAsync(ct);
+
+        // Generar todos los días del rango aunque no haya datos
+        var dias = Enumerable.Range(0, 7)
+            .Select(offset => inicio.AddDays(offset))
+            .Select(dia => new TendenciaDiaDto(
+                Fecha:       dia.ToString("dd/MM"),
+                Registrados: incidencias.Count(i => i.FechaRegistro == dia),
+                Resueltos:   incidencias.Count(i => i.FechaResolucion.HasValue && i.FechaResolucion!.Value == dia)
+            ))
+            .ToList();
+
+        return dias;
     }
 }

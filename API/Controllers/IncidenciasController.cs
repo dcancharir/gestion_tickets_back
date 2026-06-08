@@ -1,8 +1,11 @@
 ﻿using API.Extensions;
 using Application.CQRS.Commands.Incidencias;
+using Application.CQRS.Commands.Valoracion;
 using Application.CQRS.Core;
 using Application.CQRS.Queries.Incidencias;
+using Application.CQRS.Queries.Valoracion;
 using Application.DTOS.Incidencias;
+using Application.DTOS.Valoracion;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -210,6 +213,32 @@ public class IncidenciasController : ControllerBase {
         CancellationToken ct) {
         var command = new AgregarComentarioCommand(
             publicId, dto.Mensaje, dto.EsInterno, GetUsuarioId());
+
+        var result = await _dispatcher.SendAsync(command, ct);
+        return Created(string.Empty, result);
+    }
+
+    // GET api/incidencias/{publicId}/valoracion
+    [HttpGet("{publicId:guid}/valoracion")]
+    [ProducesResponseType(typeof(ValoracionDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> GetValoracion(Guid publicId, CancellationToken ct) {
+        var result = await _dispatcher.QueryAsync(new ObtenerValoracionQuery(publicId), ct);
+        return result is null ? NoContent() : Ok(result);
+    }
+
+    // POST api/incidencias/{publicId}/valoracion
+    [HttpPost("{publicId:guid}/valoracion")]
+    [ProducesResponseType(typeof(ValoracionDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Valorar(
+        Guid publicId,
+        [FromBody] CrearValoracionDto dto,
+        CancellationToken ct) {
+
+        var command = new ValorarTicketCommand(
+            publicId, GetUsuarioId(), dto.Puntuacion, dto.Comentario);
 
         var result = await _dispatcher.SendAsync(command, ct);
         return Created(string.Empty, result);

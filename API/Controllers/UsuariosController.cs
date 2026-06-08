@@ -3,6 +3,7 @@ using Application.CQRS.Core;
 using Application.CQRS.Queries.Usuarios;
 using Application.DTOS.Usuarios;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers;
 
@@ -12,6 +13,42 @@ public class UsuariosController : ControllerBase {
     private readonly IDispatcher _dispatcher;
 
     public UsuariosController(IDispatcher dispatcher) => _dispatcher = dispatcher;
+
+    // GET api/usuarios/me — perfil del usuario autenticado (lee PublicId del JWT)
+    [HttpGet("me")]
+    [ProducesResponseType(typeof(UsuarioDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetMe(CancellationToken ct) {
+        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (sub is null || !int.TryParse(sub, out _))
+            return Unauthorized();
+
+        // El publicId viene en el claim "publicId" que agrega el TokenService
+        var publicIdClaim = User.FindFirstValue("PublicId");
+        if (publicIdClaim is null || !Guid.TryParse(publicIdClaim, out var publicId))
+            return Unauthorized();
+
+        var result = await _dispatcher.QueryAsync(
+            new ObtenerUsuarioPorPublicIdQuery(publicId), ct);
+        return Ok(result);
+    }
+
+    // PUT api/usuarios/me — actualiza solo nombre/apellidos/email del propio usuario
+    [HttpPut("me")]
+    [ProducesResponseType(typeof(UsuarioDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> UpdateMe(
+        [FromBody] ActualizarPerfilDto dto,
+        CancellationToken ct) {
+
+        var publicIdClaim = User.FindFirstValue("PublicId");
+        if (publicIdClaim is null || !Guid.TryParse(publicIdClaim, out var publicId))
+            return Unauthorized();
+
+        var command = new ActualizarPerfilCommand(publicId, dto.Nombre, dto.Apellidos, dto.Email);
+        var result  = await _dispatcher.SendAsync(command, ct);
+        return Ok(result);
+    }
 
     // GET api/usuarios
     [HttpGet]

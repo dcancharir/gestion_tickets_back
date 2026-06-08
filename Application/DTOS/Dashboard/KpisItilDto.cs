@@ -18,5 +18,11 @@ public record KpisItilDto(
     double? PorcentajeResolucionPrimerContacto,
 
     // % tickets reabiertos sobre el total de cerrados
-    double? PorcentajeReincidencia
+    double? PorcentajeReincidencia,
+
+    // Tickets resueltos en los últimos 7 días
+    int Resueltos7d,
+
+    // Tickets resueltos en los 7 días anteriores (comparación de tendencia)
+    int ResueltosAnterior7d
 );

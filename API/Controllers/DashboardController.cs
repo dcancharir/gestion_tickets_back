@@ -38,4 +38,13 @@ public class DashboardController : ControllerBase {
             new ObtenerDashboardKpiTecnicoQuery(tecnicoId), ct);
         return Ok(result);
     }
+
+    // GET api/dashboard/tendencia-7d
+    // Registrados y resueltos por día en los últimos 7 días
+    [HttpGet("tendencia-7d")]
+    [ProducesResponseType(typeof(IEnumerable<TendenciaDiaDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetTendencia7d(CancellationToken ct) {
+        var result = await _dispatcher.QueryAsync(new ObtenerTendencia7dQuery(), ct);
+        return Ok(result);
+    }
 }

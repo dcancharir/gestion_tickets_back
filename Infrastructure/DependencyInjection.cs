@@ -33,6 +33,7 @@ public static class DependencyInjection {
         services.AddScoped<IUsuarioSedeRepository, UsuarioSedeRepository>();
         services.AddScoped<IIncidenciaAdjuntoRepository, IncidenciaAdjuntoRepository>();
         services.AddScoped<IDashboardRepository, DashboardRepository>();
+        services.AddScoped<IValoracionRepository, ValoracionRepository>();
         // ── Servicios ─────────────────────────────────────────────────────────
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IEmailService, EmailService>();
