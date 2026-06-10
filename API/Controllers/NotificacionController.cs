@@ -34,6 +34,7 @@ public class NotificacionController : ControllerBase {
             n.NumeroTicket,
             n.Titulo,
             n.Mensaje,
+            n.Leida,
             n.FechaCreacion)));
     }
 

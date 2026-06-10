@@ -52,6 +52,7 @@ public class NotificacionService : INotificacionService {
                 numeroTicket,
                 titulo,
                 mensaje,
+                Leida: false,          // notificación recién creada → siempre no leída
                 notificacion.FechaCreacion
             ), ct);
     }

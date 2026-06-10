@@ -30,7 +30,8 @@ public class Incidencia {
     public DateTime? FechaLimiteResolucion { get; set; }
     public DateTime? FechaPrimeraRespuesta { get; set; }
     public int? EscaladoAId { get; set; }
-    public DateTime? FechaEscalamiento { get; set; }
+    public DateTime? FechaEscalamiento { get; set; }       // dato: cuándo ocurrió el escalamiento
+    public bool EscalamientoNotificado { get; set; } = false; // flag: las notificaciones ya fueron enviadas
     public byte NumeroReasignaciones { get; set; } = 0;
 
     public string? SolucionAplicada { get; set; }

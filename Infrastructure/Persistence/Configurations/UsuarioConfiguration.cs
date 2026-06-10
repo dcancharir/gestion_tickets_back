@@ -55,6 +55,13 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario> {
 
         builder.Property(u => u.HasFullAccess).HasDefaultValue(false);
 
+        builder.Property(u => u.TokenRecuperacion)
+            .HasMaxLength(200)
+            .IsRequired(false);
+
+        builder.Property(u => u.TokenExpiracion)
+            .IsRequired(false);
+
         builder.HasOne(u => u.Rol)
             .WithMany(r => r.Usuarios)
             .HasForeignKey(u => u.RolId)

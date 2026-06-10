@@ -31,5 +31,10 @@ public class Usuario {
     public string UserName { get; set; } = string.Empty;
     public bool HasFullAccess { get; set; } = false;
 
+    // ── Recuperación de contraseña ────────────────────────────────────────────
+    /// <summary>Token único para restablecer contraseña. Null cuando no hay solicitud activa.</summary>
+    public string? TokenRecuperacion { get; set; }
+    /// <summary>Fecha de expiración del token (válido 2 horas).</summary>
+    public DateTime? TokenExpiracion { get; set; }
 }
 

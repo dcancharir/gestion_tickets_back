@@ -23,4 +23,8 @@ public interface IUsuarioRepository {
     Task<bool> ExisteUserNameAsync(string userName, int? excluirId = null, CancellationToken ct = default);
     Task<Usuario?> ObtenerPorUserNameAsync(string userName, CancellationToken ct = default);
     Task<IEnumerable<Usuario>> ObtenerPorRolId(int rolId, CancellationToken ct = default);
+
+    // ── Recuperación de contraseña ────────────────────────────────────────────
+    Task<Usuario?> ObtenerPorTokenRecuperacionAsync(string token, CancellationToken ct = default);
+    Task ActualizarPasswordAsync(int usuarioId, string nuevoHash, CancellationToken ct = default);
 }

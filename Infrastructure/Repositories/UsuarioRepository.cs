@@ -76,4 +76,21 @@ public class UsuarioRepository : IUsuarioRepository {
     public async Task<IEnumerable<Usuario>> ObtenerPorRolId(int rolId, CancellationToken ct = default) {
         return await _db.Usuarios.Where(x => x.RolId == rolId).ToListAsync();
     }
+
+    // ── Recuperación de contraseña ────────────────────────────────────────────
+
+    public async Task<Usuario?> ObtenerPorTokenRecuperacionAsync(
+        string token, CancellationToken ct = default) =>
+        await _db.Usuarios
+            .FirstOrDefaultAsync(u => u.TokenRecuperacion == token, ct);
+
+    public async Task ActualizarPasswordAsync(
+        int usuarioId, string nuevoHash, CancellationToken ct = default) {
+        var usuario = await _db.Usuarios.FindAsync(new object[] { usuarioId }, ct)
+            ?? throw new KeyNotFoundException($"Usuario {usuarioId} no encontrado.");
+        usuario.PasswordHash     = nuevoHash;
+        usuario.TokenRecuperacion = null;
+        usuario.TokenExpiracion   = null;
+        await _db.SaveChangesAsync(ct);
+    }
 }

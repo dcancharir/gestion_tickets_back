@@ -84,9 +84,12 @@ public class IncidenciaRepository : IIncidenciaRepository {
     }
 
     /// <summary>
-    /// Devuelve tickets cuyo SLA de resolución ya venció, que no han sido
-    /// escalados todavía (FechaEscalamiento == null) y que no están en estado final.
-    /// EstadoId 6 = Resuelto, 7 = Cerrado.
+    /// Devuelve tickets cuyo SLA de resolución ya venció, cuyas notificaciones
+    /// de escalamiento aún no fueron enviadas (EscalamientoNotificado == false)
+    /// y que no están en estado final. EstadoId 6 = Resuelto, 7 = Cerrado.
+    /// Usar EscalamientoNotificado como flag de idempotencia (en lugar de
+    /// FechaEscalamiento == null) permite re-escalar un ticket sin bloquear
+    /// nuevas notificaciones si se resetea el flag.
     /// </summary>
     public async Task<IEnumerable<Incidencia>> ObtenerVencidasSinEscalarAsync(CancellationToken ct = default) =>
         await _db.Incidencias
@@ -96,7 +99,7 @@ public class IncidenciaRepository : IIncidenciaRepository {
             .Where(i =>
                 i.FechaLimiteResolucion != null &&
                 i.FechaLimiteResolucion < DateTime.Now &&
-                i.FechaEscalamiento == null &&
+                !i.EscalamientoNotificado &&
                 i.EstadoId != 6 &&
                 i.EstadoId != 7)
             .ToListAsync(ct);
@@ -105,7 +108,8 @@ public class IncidenciaRepository : IIncidenciaRepository {
         await _db.Incidencias
             .Where(i => i.IncidenciaId == incidenciaId)
             .ExecuteUpdateAsync(s => s
-                .SetProperty(i => i.FechaEscalamiento, fechaEscalamiento)
+                .SetProperty(i => i.FechaEscalamiento,        fechaEscalamiento)
+                .SetProperty(i => i.EscalamientoNotificado,   true)
                 .SetProperty(i => i.FechaUltimaActualizacion, fechaEscalamiento),
                 ct);
     }

@@ -1,4 +1,5 @@
-﻿using Application.CQRS.Commands.Usuarios;
+﻿using Application.CQRS.Commands.Auth;
+using Application.CQRS.Commands.Usuarios;
 using Application.CQRS.Core;
 using Application.CQRS.Queries.Usuarios;
 using Application.DTOS.Usuarios;
@@ -48,6 +49,29 @@ public class UsuariosController : ControllerBase {
         var command = new ActualizarPerfilCommand(publicId, dto.Nombre, dto.Apellidos, dto.Email);
         var result  = await _dispatcher.SendAsync(command, ct);
         return Ok(result);
+    }
+
+    // PUT api/usuarios/me/password — el usuario cambia su propia contraseña
+    [HttpPut("me/password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CambiarPassword(
+        [FromBody] CambiarPasswordDto dto,
+        CancellationToken ct) {
+
+        var publicIdClaim = User.FindFirstValue("PublicId");
+        if (publicIdClaim is null || !Guid.TryParse(publicIdClaim, out var publicId))
+            return Unauthorized();
+
+        if (dto.NuevoPassword != dto.ConfirmarPassword)
+            return BadRequest(new { mensaje = "Las contraseñas no coinciden." });
+
+        await _dispatcher.SendAsync(
+            new CambiarPasswordCommand(publicId, dto.PasswordActual, dto.NuevoPassword), ct);
+
+        return Ok(new { mensaje = "Contraseña actualizada correctamente." });
     }
 
     // GET api/usuarios

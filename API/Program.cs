@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,7 +75,11 @@ builder.Services
 builder.Services.AddAuthorization();
 
 // ── SignalR ───────────────────────────────────────────────────────────────────
-builder.Services.AddSignalR();
+// Se configura camelCase para que el payload llegue igual que el REST JSON al frontend
+builder.Services.AddSignalR()
+    .AddJsonProtocol(opt => {
+        opt.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 // ── Repositorio de notificaciones ────────────────────────────────────────────
 builder.Services.AddScoped<INotificacionRepository, Infrastructure.Repositories.NotificacionRepository>();

@@ -55,9 +55,10 @@ public class EscalarIncidenciaHandler
 
         var ahora = DateTime.Now;
 
-        incidencia.EscaladoAId = tecnico.UsuarioId;
-        incidencia.FechaEscalamiento = ahora;
-        incidencia.TecnicoAsignadoId = tecnico.UsuarioId;
+        incidencia.EscaladoAId            = tecnico.UsuarioId;
+        incidencia.FechaEscalamiento      = ahora;
+        incidencia.EscalamientoNotificado = true;  // notificación enviada por este handler
+        incidencia.TecnicoAsignadoId      = tecnico.UsuarioId;
         incidencia.FechaAsignacion = ahora;
         incidencia.NumeroReasignaciones++;
         incidencia.FechaUltimaActualizacion = ahora;
