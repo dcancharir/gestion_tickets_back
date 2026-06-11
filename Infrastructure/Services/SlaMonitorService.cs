@@ -101,12 +101,11 @@ public class SlaMonitorService : BackgroundService {
 
                     await notifSvc.GuardarYNotificarAsync(
                         tecnico.UsuarioId,
-                        "SLA Incumplido",
-                        incidencia.PublicId.ToString(),
-                        incidencia.NumeroTicket,
-                        incidencia.Titulo,
-                        $"⚠️ El ticket {incidencia.NumeroTicket} ha superado su SLA " +
-                        $"de resolución. Atención urgente requerida.",
+                        tipo:       "SLA Incumplido",
+                        titulo:     $"SLA vencido: {incidencia.NumeroTicket}",
+                        mensaje:    $"⚠️ El ticket {incidencia.NumeroTicket} ha superado su SLA de resolución. Atención urgente requerida.",
+                        referencia: incidencia.NumeroTicket,
+                        urlDestino: $"/tickets/{incidencia.PublicId}",
                         ct);
 
                     var template = EmailTemplateStrings.SlaIncumplidoTemplate(
@@ -134,12 +133,11 @@ public class SlaMonitorService : BackgroundService {
                     foreach(var admin in admins) {
                         await notifSvc.GuardarYNotificarAsync(
                             admin.UsuarioId,
-                            "SLA Incumplido",
-                            incidencia.PublicId.ToString(),
-                            incidencia.NumeroTicket,
-                            incidencia.Titulo,
-                            $"⚠️ El ticket {incidencia.NumeroTicket} venció su SLA " +
-                            $"y no tiene técnico asignado. Asignación urgente requerida.",
+                            tipo:       "SLA Incumplido",
+                            titulo:     $"SLA vencido sin técnico: {incidencia.NumeroTicket}",
+                            mensaje:    $"⚠️ El ticket {incidencia.NumeroTicket} venció su SLA y no tiene técnico asignado. Asignación urgente requerida.",
+                            referencia: incidencia.NumeroTicket,
+                            urlDestino: $"/tickets/{incidencia.PublicId}",
                             ct);
 
                         var template = EmailTemplateStrings.SlaIncumplidoSinTecnicoTemplate(

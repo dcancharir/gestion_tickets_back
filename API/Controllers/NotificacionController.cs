@@ -30,11 +30,11 @@ public class NotificacionController : ControllerBase {
         return Ok(lista.Select(n => new NotificacionDto(
             n.NotificacionId,
             n.Tipo,
-            n.TicketPublicId,
-            n.NumeroTicket,
+            n.Referencia,
             n.Titulo,
             n.Mensaje,
             n.Leida,
+            n.UrlDestino,
             n.FechaCreacion)));
     }
 

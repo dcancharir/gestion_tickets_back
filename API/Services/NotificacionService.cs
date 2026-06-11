@@ -23,22 +23,22 @@ public class NotificacionService : INotificacionService {
     }
 
     public async Task GuardarYNotificarAsync(
-        int    usuarioId,
-        string tipo,
-        string ticketPublicId,
-        string numeroTicket,
-        string titulo,
-        string mensaje,
+        int     usuarioId,
+        string  tipo,
+        string  titulo,
+        string  mensaje,
+        string? referencia   = null,
+        string? urlDestino   = null,
         CancellationToken ct = default) {
 
         // 1. Guardar en BD para que el usuario la vea al (re)iniciar sesión
         var notificacion = await _notifRepo.CrearAsync(new Notificacion {
             UsuarioId     = usuarioId,
             Tipo          = tipo,
-            TicketPublicId = ticketPublicId,
-            NumeroTicket  = numeroTicket,
+            Referencia    = referencia,
             Titulo        = titulo,
             Mensaje       = mensaje,
+            UrlDestino    = urlDestino,
             FechaCreacion = DateTime.Now
         }, ct);
 
@@ -48,11 +48,11 @@ public class NotificacionService : INotificacionService {
             .SendAsync("RecibirNotificacion", new NotificacionDto(
                 notificacion.NotificacionId,
                 tipo,
-                ticketPublicId,
-                numeroTicket,
+                referencia,
                 titulo,
                 mensaje,
-                Leida: false,          // notificación recién creada → siempre no leída
+                Leida:      false,
+                UrlDestino: urlDestino,
                 notificacion.FechaCreacion
             ), ct);
     }

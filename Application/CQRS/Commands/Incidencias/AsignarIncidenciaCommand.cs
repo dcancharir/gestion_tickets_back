@@ -94,11 +94,11 @@ public class AsignarIncidenciaHandler
         // Notificación persistida en BD + en tiempo real al técnico asignado
         await _notifSvc.GuardarYNotificarAsync(
             tecnico.UsuarioId,
-            "Asignación",
-            incidencia.PublicId.ToString(),
-            incidencia.NumeroTicket,
-            incidencia.Titulo,
-            $"Se te ha asignado el ticket {incidencia.NumeroTicket}: {incidencia.Titulo}",
+            tipo:       "Asignación",
+            titulo:     $"Ticket asignado: {incidencia.NumeroTicket}",
+            mensaje:    $"Se te ha asignado el ticket {incidencia.NumeroTicket}: {incidencia.Titulo}",
+            referencia: incidencia.NumeroTicket,
+            urlDestino: $"/tickets/{incidencia.PublicId}",
             ct);
 
         // Email al técnico asignado

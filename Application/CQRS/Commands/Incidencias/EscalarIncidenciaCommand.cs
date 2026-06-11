@@ -79,11 +79,11 @@ public class EscalarIncidenciaHandler
         // Notificación persistida en BD + en tiempo real al técnico al que se escala
         await _notifSvc.GuardarYNotificarAsync(
             tecnico.UsuarioId,
-            "Escalamiento",
-            incidencia.PublicId.ToString(),
-            incidencia.NumeroTicket,
-            incidencia.Titulo,
-            $"Se te ha escalado el ticket {incidencia.NumeroTicket}: {incidencia.Titulo}. Motivo: {cmd.Motivo}",
+            tipo:       "Escalamiento",
+            titulo:     $"Ticket escalado: {incidencia.NumeroTicket}",
+            mensaje:    $"Se te ha escalado el ticket {incidencia.NumeroTicket}: {incidencia.Titulo}. Motivo: {cmd.Motivo}",
+            referencia: incidencia.NumeroTicket,
+            urlDestino: $"/tickets/{incidencia.PublicId}",
             ct);
 
         return IncidenciaMapper.ToListItem(actualizada!);

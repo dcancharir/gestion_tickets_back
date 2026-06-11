@@ -10,10 +10,10 @@ public class NotificacionConfiguration : IEntityTypeConfiguration<Notificacion> 
         builder.HasKey(n => n.NotificacionId);
 
         builder.Property(n => n.Tipo).HasMaxLength(50).IsRequired();
-        builder.Property(n => n.TicketPublicId).HasMaxLength(36).IsRequired();
-        builder.Property(n => n.NumeroTicket).HasMaxLength(20).IsRequired();
+        builder.Property(n => n.Referencia).HasMaxLength(50).IsRequired(false);
         builder.Property(n => n.Titulo).HasMaxLength(300).IsRequired();
         builder.Property(n => n.Mensaje).HasMaxLength(500).IsRequired();
+        builder.Property(n => n.UrlDestino).HasMaxLength(300).IsRequired(false);
 
         builder.HasOne(n => n.Usuario)
             .WithMany()
