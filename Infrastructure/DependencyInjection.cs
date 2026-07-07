@@ -35,6 +35,7 @@ public static class DependencyInjection {
         services.AddScoped<IDashboardRepository, DashboardRepository>();
         services.AddScoped<IReportesRepository, ReportesRepository>();
         services.AddScoped<IValoracionRepository, ValoracionRepository>();
+        services.AddScoped<IFavoritoRepository, FavoritoRepository>();
         // ── Servicios ─────────────────────────────────────────────────────────
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IEmailService, EmailService>();

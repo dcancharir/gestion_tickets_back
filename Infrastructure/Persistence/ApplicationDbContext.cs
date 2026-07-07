@@ -30,6 +30,7 @@ public class ApplicationDbContext : DbContext {
     public DbSet<UsuarioSede> UsuarioSede { get; set; }
     public DbSet<Notificacion> Notificaciones { get; set; }
     public DbSet<ValoracionTicket> ValoracionesTicket { get; set; }
+    public DbSet<TicketFavorito>   TicketsFavoritos   { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
